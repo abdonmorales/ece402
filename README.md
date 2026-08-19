@@ -4,19 +4,9 @@ Personal coursework archive for a college electrical circuits course, kept by Ab
 
 Note on the repo name: this repository is named `ece402` as a personal shorthand from when the coursework began. The actual course is **ACC ENGR 2405**, described below.
 
-## Disclaimer
+## Academic Integrity
 
-This is a **personal academic archive, not a software project or a maintained codebase.** There is nothing to build, install, or run here — it is a collection of documents (PDFs, notes, lab reports, and simulation files) organized by folder.
-
-**Third-party copyrighted material.** This repository contains a substantial amount of material that is not the owner's original work, including:
-
-- A full commercial textbook (`ECE 302 Textbook.pdf`, Ulaby) and scanned excerpts of the assigned course textbook (Alexander & Sadiku, *Fundamentals of Electric Circuits*, 7th ed.)
-- Instructor-authored lecture slide decks and lab handouts (in `Lecture Notes/` and within each `Lab Notes/` folder)
-- The LTspice demo-circuit library bundled with the LTspice application (`Demo Circuits for LTSpice/`), authored by Analog Devices / Linear Technology / Maxim
-
-The ACC ENGR 2405 syllabus explicitly states that such materials may not be reproduced or posted to any server, website, or online forum without the copyright holder's consent. **This content should not be treated as freely licensed or reproducible**, and ideally should be removed from the repository (and its git history) before or as part of making this repository public. This is flagged here as an open item for the repository owner to address — it is not something this README resolves on its own.
-
-**Academic integrity.** The homework solutions and lab reports in this repository are the owner's own coursework, shared here for personal reference and portfolio purposes. They are not intended to be copied or submitted by other students, and doing so would violate academic integrity policies at ACC or any other institution.
+The homework solutions and lab reports in this repository are the owner's own coursework, shared here for personal reference and portfolio purposes. They are not intended to be copied or submitted by other students, and doing so would violate academic integrity policies at ACC or any other institution.
 
 ## Course Information
 
@@ -78,7 +68,7 @@ Eleven PDFs (HW 01–09, Pset 10, Pset 14) — the owner's own worked homework s
 
 ### Lecture Notes
 
-Ten PDFs of the instructor's slide decks (Chapters 1–12). Not the owner's original work — see the Disclaimer above.
+Ten PDFs of the instructor's slide decks (Chapters 1–12). Not the owner's original work.
 
 ### Demo Circuits for LTSpice
 
