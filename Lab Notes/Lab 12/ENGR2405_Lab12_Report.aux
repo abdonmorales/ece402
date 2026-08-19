@@ -1,0 +1,34 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Component values used in both circuits. The same four parts are used for the high-pass version; only their positions change.}}{2}{table.caption.3}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{tab:parts}{{1}{2}{Component values used in both circuits. The same four parts are used for the high-pass version; only their positions change}{table.caption.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Low-pass Sallen-Key circuit as built. The op-amp is wired as a unity-gain follower, so $V_2 = V_{\text  {out}}$.}}{2}{figure.caption.4}\protected@file@percent }
+\newlabel{fig:lp}{{1}{2}{Low-pass Sallen-Key circuit as built. The op-amp is wired as a unity-gain follower, so $V_2 = V_{\text {out}}$}{figure.caption.4}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces High-pass version. Every resistor has traded places with the capacitor that occupied the corresponding position in Figure~\ref {fig:lp}, and no values have changed.}}{3}{figure.caption.5}\protected@file@percent }
+\newlabel{fig:hp}{{2}{3}{High-pass version. Every resistor has traded places with the capacitor that occupied the corresponding position in Figure~\ref {fig:lp}, and no values have changed}{figure.caption.5}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {1}{\ignorespaces LTspice netlist for the low-pass Sallen-Key circuit.}}{4}{lstlisting.1}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {2}{\ignorespaces LTspice netlist for the high-pass Sallen-Key circuit. Only the four passive lines differ.}}{5}{lstlisting.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Low-pass circuit as entered in LTspice and its simulated frequency response.}}{6}{figure.caption.8}\protected@file@percent }
+\newlabel{fig:sim-lp}{{3}{6}{Low-pass circuit as entered in LTspice and its simulated frequency response}{figure.caption.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces High-pass circuit as entered in LTspice and its simulated frequency response.}}{7}{figure.caption.9}\protected@file@percent }
+\newlabel{fig:sim-hp}{{4}{7}{High-pass circuit as entered in LTspice and its simulated frequency response}{figure.caption.9}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Raw low-pass measurements.}}{9}{table.caption.12}\protected@file@percent }
+\newlabel{tab:rawlp}{{2}{9}{Raw low-pass measurements}{table.caption.12}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Raw high-pass measurements.}}{9}{table.caption.13}\protected@file@percent }
+\newlabel{tab:rawhp}{{3}{9}{Raw high-pass measurements}{table.caption.13}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Low-pass results. $|H|$ measured is $V_{\text  {out}}/V_{\text  {in}}$ from Table~\ref {tab:rawlp}, and the design column is evaluated from $|H| = \left [(1-\omega ^2R_1C_1R_2C_2)^2+(\omega (R_1+R_2)C_2)^2\right ]^{-1/2}$ with the nominal part values. Phase is negative because the output lags.}}{10}{table.caption.14}\protected@file@percent }
+\newlabel{tab:reslp}{{4}{10}{Low-pass results. $|H|$ measured is $V_{\text {out}}/V_{\text {in}}$ from Table~\ref {tab:rawlp}, and the design column is evaluated from $|H| = \left [(1-\omega ^2R_1C_1R_2C_2)^2+(\omega (R_1+R_2)C_2)^2\right ]^{-1/2}$ with the nominal part values. Phase is negative because the output lags}{table.caption.14}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces High-pass results, computed from the derived expressions above with the same part values. Phase is positive because the output leads. $^{\dagger }$The raw \qty {1560}{\micro \second } is \qty {280.8}{\degree } of the period, so the cursors sat on the wrong pair of crossings; the complementary angle \qty {79.2}{\degree } is entered.}}{10}{table.caption.15}\protected@file@percent }
+\newlabel{tab:reshp}{{5}{10}{High-pass results, computed from the derived expressions above with the same part values. Phase is positive because the output leads. $^{\dagger }$The raw \qty {1560}{\micro \second } is \qty {280.8}{\degree } of the period, so the cursors sat on the wrong pair of crossings; the complementary angle \qty {79.2}{\degree } is entered}{table.caption.15}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Low-pass magnitude and phase. The solid curve is the prelab design, the open squares are measured.}}{11}{figure.caption.16}\protected@file@percent }
+\newlabel{fig:lpresp}{{5}{11}{Low-pass magnitude and phase. The solid curve is the prelab design, the open squares are measured}{figure.caption.16}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces High-pass magnitude and phase. Note the absence of any peak, which follows from $Q^{\text  {HP}} = 0.218$.}}{12}{figure.caption.17}\protected@file@percent }
+\newlabel{fig:hpresp}{{6}{12}{High-pass magnitude and phase. Note the absence of any peak, which follows from $Q^{\text {HP}} = 0.218$}{figure.caption.17}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Both magnitude responses in decibels. The linear plots hide the fact that the measured low-pass stops falling near \qty {-36}{\decibel } instead of continuing at \qty {-40}{\decibel } per decade.}}{12}{figure.caption.18}\protected@file@percent }
+\newlabel{fig:db}{{7}{12}{Both magnitude responses in decibels. The linear plots hide the fact that the measured low-pass stops falling near \qty {-36}{\decibel } instead of continuing at \qty {-40}{\decibel } per decade}{figure.caption.18}{}}
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {3}{\ignorespaces SciLab program \texttt  {lab12\_resp.sce}.}}{13}{lstlisting.3}\protected@file@percent }
+\@writefile{lol}{\contentsline {lstlisting}{\numberline {4}{\ignorespaces SciLab runtime output.}}{13}{lstlisting.4}\protected@file@percent }
+\gdef \@abspage@last{15}

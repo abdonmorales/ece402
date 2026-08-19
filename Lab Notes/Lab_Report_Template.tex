@@ -1,0 +1,225 @@
+%==============================================================================
+%  ENGR 2405 -- Electrical Circuits I
+%  Lab Report Template
+%
+%  Compile with pdflatex (run twice so the running header settles).
+%  Referenced images : schematic.png  scope_shot.png  ltspice_plot.png
+%==============================================================================
+\documentclass[11pt]{article}
+
+% ---- packages ---------------------------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{siunitx}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{caption}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{circuitikz}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+\usepackage[hidelinks]{hyperref}
+
+% ---- siunitx v2 / v3 compatibility ------------------------------------------
+% \qty is siunitx v3; if the local install is still v2, fall back to \SI.
+\ifdefined\qty\else\newcommand{\qty}[2]{\SI{#1}{#2}}\fi
+\ifdefined\unit\else\newcommand{\unit}[1]{\si{#1}}\fi
+
+% ---- table + notation defaults ----------------------------------------------
+\renewcommand{\arraystretch}{1.15}
+\newcommand{\degre}{^{\circ}}
+
+% ---- SciLab listing style ---------------------------------------------------
+\definecolor{codekw}{rgb}{0.00,0.30,0.70}
+\definecolor{codecom}{rgb}{0.20,0.55,0.20}
+\definecolor{codestr}{rgb}{0.64,0.08,0.08}
+
+\lstdefinelanguage{Scilab}{
+    morekeywords={
+        function,endfunction,if,then,else,elseif,end,for,while,do,
+        select,case,break,continue,return,clc,clear,disp,mprintf,
+        printf,zeros,ones,eye,linspace,inv,det,sum,length,size,abs,
+        sqrt,real,imag,exp,sin,cos,tan,atan,plot,plot2d,xlabel,ylabel,
+        title,legend,grid,poly,roots,find,pause,error,warning
+    },
+    sensitive=true,
+    morecomment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    morestring=[b]",
+    morestring=[b]',
+}
+\lstdefinestyle{scilab}{
+    language=Scilab,
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{codekw}\bfseries,
+    commentstyle=\color{codecom}\itshape,
+    stringstyle=\color{codestr},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    numbersep=8pt,
+    frame=single,
+    rulecolor=\color{gray!50},
+    breaklines=true,
+    showstringspaces=false,
+    tabsize=4,
+    captionpos=b,
+    xleftmargin=14pt,
+}
+
+% ---- LTspice netlist style --------------------------------------------------
+\lstdefinelanguage{LTspice}{
+    morekeywords={
+        .tran,.op,.dc,.ac,.step,.param,.model,.lib,.include,.inc,
+        .meas,.measure,.save,.backanno,.end,.ends,.subckt,.global,
+        .ic,.nodeset,.options,.option,.func,.temp,.four,.noise,.tf
+    },
+    sensitive=false,
+    morecomment=[l]{*},
+    morecomment=[l]{;},
+    morestring=[b]",
+}
+\lstdefinestyle{netlist}{
+    language=LTspice,
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{codekw}\bfseries,
+    commentstyle=\color{codecom}\itshape,
+    frame=single,
+    rulecolor=\color{gray!50},
+    breaklines=true,
+    tabsize=4,
+    captionpos=b,
+    xleftmargin=14pt,
+}
+
+% ---- plain console / runtime printout style ---------------------------------
+\lstdefinestyle{console}{
+    basicstyle=\ttfamily\footnotesize,
+    frame=single,
+    rulecolor=\color{gray!50},
+    breaklines=true,
+    tabsize=4,
+    captionpos=b,
+    xleftmargin=14pt,
+}
+
+% ---- running header ---------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{ENGR 2405 -- Lab <N>}
+\rhead{Abdon Morales}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+%==============================================================================
+\begin{document}
+
+% ----------------------------- title block -----------------------------------
+\begin{center}
+    {\large\bfseries ENGR 2405 -- Electrical Circuits I}\\[2pt]
+    {\large\bfseries Laboratory \#<N>: <Lab Title>}\\[10pt]
+    \begin{tabular}{rl}
+        Name:    & Abdon Morales \\
+        UT EID:  & am226923 \\
+        Date:    & \today \\
+    \end{tabular}
+\end{center}
+\vspace{0.5em}
+\hrule
+\vspace{1.5em}
+
+% ----------------------------- description -----------------------------------
+\section*{Description}
+<Brief description of the lab, taken from the lab assignment and put in your own
+words. State what circuit is built, what is measured, and what the lab is meant
+to demonstrate.>
+
+%==============================================================================
+\section*{Procedure}
+%==============================================================================
+\begin{enumerate}[leftmargin=*]
+    \item <First step.>
+    \item <Second step.>
+    \item <Third step.>
+\end{enumerate}
+
+%==============================================================================
+\section*{Calculations}
+%==============================================================================
+% Delete this section if the lab has no hand calculations.
+<Set up the governing equations before any numbers go in.>
+\[
+    V = IR
+\]
+
+% Pull the program straight out of the .sce file (uncomment when the file exists):
+% \lstinputlisting[style=scilab, caption={SciLab program \texttt{lab.sce}.}]{lab.sce}
+
+% Or paste it inline:
+\begin{lstlisting}[style=scilab, caption={SciLab program.}]
+// paste program here
+R = [10 20 30];
+Rseries = sum(R)
+\end{lstlisting}
+
+\begin{lstlisting}[style=console, caption={SciLab runtime output.}]
+ Rseries =
+    60.
+\end{lstlisting}
+
+%==============================================================================
+\section*{Simulations}
+%==============================================================================
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.85\textwidth]{schematic.png}
+    \fbox{\parbox[c][3.5cm][c]{0.85\textwidth}{\centering <LTspice schematic image>}}
+    \caption{LTspice schematic.}
+\end{figure}
+
+\begin{lstlisting}[style=netlist, caption={LTspice netlist.}]
+* paste netlist here
+V1 N001 0 SINE(0 5 1k)
+R1 N001 0 1k
+.tran 5m
+.end
+\end{lstlisting}
+
+%==============================================================================
+\section*{Measurements}
+%==============================================================================
+\begin{table}[H]
+    \centering
+    \caption{Calculated and measured values.}
+    \begin{tabular}{lccc}
+        \toprule
+        Quantity & Calculated & Measured & \% Error \\
+        \midrule
+        $V_1$ & <\ > & <\ > & <\ > \\
+        $I_1$ & <\ > & <\ > & <\ > \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.8\textwidth]{scope_shot.png}
+    \fbox{\parbox[c][3.5cm][c]{0.8\textwidth}{\centering <Oscilloscope capture>}}
+    \caption{Oscilloscope capture.}
+\end{figure}
+
+%==============================================================================
+\section*{Observations \& Discussion}
+%==============================================================================
+<Connected prose. Compare measured against calculated, explain the size and
+direction of any discrepancy, flag anything anomalous in the data, and answer
+the questions asked in the lab handout.>
+
+%==============================================================================
+\end{document}

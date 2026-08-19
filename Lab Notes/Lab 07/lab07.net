@@ -1,0 +1,53 @@
+Wire List
+
+                                              Revised: Wednesday, July 08, 2026
+                                              Revision: A
+LINEAR TECHNOLOGY
+
+
+
+
+
+
+<<< Component List >>>
+7.5k                          R1        res
+10k                           R         res
+                              U1        UniversalOpAmp2
+100µF                         C1        cap
+2.4k                          R2        res
+5                             V1        voltage
+5                             V2        voltage
+
+<<< Wire List >>>
+
+  NODE  REFERENCE    PIN #   PIN NAME           PIN TYPE       PART VALUE
+
+[00001] Vout
+        R1              1       A               Passive        7.5k
+        R               1       A               Passive        10k
+        U1              5       OUT             Passive        
+
+[00002] N003
+        R1              2       B               Passive        7.5k
+        U1              1       In+             Passive        
+        R2              1       A               Passive        2.4k
+
+[00003] N001
+        R               2       B               Passive        10k
+        U1              2       In-             Passive        
+        C1              1       A               Passive        100µF
+
+[00004] N002
+        U1              3       V+              Passive        
+        V1              1       +               Passive        5
+
+[00005] N004
+        U1              4       V-              Passive        
+        V2              2       -               Passive        5
+
+[00006] 0
+        C1              2       B               Passive        100µF
+        R2              2       B               Passive        2.4k
+        V1              2       -               Passive        5
+        V2              1       +               Passive        5
+

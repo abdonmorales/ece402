@@ -1,0 +1,36 @@
+* ============================================================================
+*  opamp_sat  -  behavioral op-amp for ngspice (KiCad-compatible)
+*
+*  Purpose: drop-in stand-in for LTSpice's UniversalOpAmp2 in the Lab 7
+*  relaxation oscillator. It is a high-gain amplifier whose output hard-clamps
+*  to the supply rails, which is the only op-amp property the astable relies on.
+*
+*  Pin order (needed for KiCad "Pin Assignments"):
+*      1 = inp   non-inverting input (+)
+*      2 = inn   inverting input (-)
+*      3 = vcc   positive supply pin
+*      4 = vee   negative supply pin
+*      5 = out   output
+*
+*  VSAT_MARGIN sets how far the output stops short of each rail:
+*      0.0  -> clamps essentially to the rails (like UniversalOpAmp2)
+*      1.5  -> approximates a real 741 (output swings ~1.5 V inside each rail)
+* ============================================================================
+.subckt opamp_sat inp inn vcc vee out
+
+.param GAIN=1e6
+.param VSAT_MARGIN=0.0
+
+* high-gain differential stage
+Bgain ng 0 V = GAIN*(V(inp)-V(inn))
+
+* single dominant pole (~1 kHz) - well above the ~1 Hz oscillation,
+* present only to aid convergence and avoid an algebraic loop
+Rpole  ng npole 1k
+Cpole  npole 0 159n
+
+* output stage: clamp between the two supply-node voltages
+Bout nout 0 V = max( min( V(npole), V(vcc)-VSAT_MARGIN ), V(vee)+VSAT_MARGIN )
+Rout nout out 100
+
+.ends opamp_sat

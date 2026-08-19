@@ -1,0 +1,684 @@
+%==============================================================================
+%  ENGR 2405 - Electrical Circuits I
+%  Lab 9 - Sinusoids & Phasors
+%
+%  Compile with pdfLaTeX (or XeLaTeX / LuaLaTeX).
+%==============================================================================
+\documentclass[11pt]{article}
+
+%------------------------- Packages -------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}     % page margins
+\usepackage{amsmath,amssymb}          % math
+\usepackage{graphicx}                 % \includegraphics (kept for optional schematics)
+\usepackage{float}                    % [H] figure placement
+\usepackage{booktabs}                 % nicer tables
+\usepackage{siunitx}                  % \SI{5}{\ohm}, \SI{10}{\milli\second}, etc.
+\usepackage{listings}                 % SciLab code blocks
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage[hidelinks]{hyperref}
+\usepackage{titlesec}
+
+%------------------------- Section styling ------------------------------------
+\titleformat{\section}{\Large\bfseries}{}{0pt}{}
+\titlespacing*{\section}{0pt}{1.4em}{0.6em}
+
+%------------------------- Code listing style ---------------------------------
+\definecolor{codebg}{RGB}{245,245,245}
+\definecolor{codecomment}{RGB}{0,128,0}
+\definecolor{codekw}{RGB}{0,0,180}
+\lstset{
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    framesep=4pt,
+    keywordstyle=\color{codekw}\bfseries,
+    commentstyle=\color{codecomment}\itshape,
+    showstringspaces=false,
+    captionpos=b,
+    tabsize=2,
+}
+\definecolor{codestr}{RGB}{163,21,21}      % strings
+\definecolor{codenum}{RGB}{120,120,120}    % numbers
+
+% --- SciLab (custom: listings has no built-in SciLab language) -------------
+\lstdefinelanguage{Scilab}{
+    morekeywords={
+        function,endfunction,if,then,else,elseif,end,for,while,do,
+        select,case,break,continue,return,clc,clear,disp,mprintf,
+        printf,zeros,ones,eye,linspace,inv,det,sum,length,size,abs,
+        sqrt,real,imag,exp,sin,cos,tan,plot,plot2d,xlabel,ylabel,
+        title,legend,grid,poly,roots,find,pause,error,warning
+    },
+    sensitive=true,
+    morecomment=[l]{//},          % line comment
+    morecomment=[s]{/*}{*/},      % block comment
+    morestring=[b]",              % double-quoted strings
+    morestring=[b]',              % single-quoted strings
+}
+\lstdefinestyle{scilab}{
+    language=Scilab,
+    stringstyle=\color{codestr},
+}
+
+%==============================================================================
+\begin{document}
+
+%------------------------- Title block ----------------------------------------
+\begin{center}
+    {\LARGE\bfseries Lab 9 --- Sinusoids \& Phasors}\\[0.8em]
+    {\large Abdon Morales}\\[0.3em]
+    {\large \today}
+\end{center}
+\vspace{1em}
+
+%------------------------------------------------------------------------------
+\section*{Description}
+
+This lab looks at how series RC, RL, and RLC circuits behave when they are driven
+by a sine wave instead of a DC source. Each circuit is built on the trainer,
+driven with a \SI{10}{\volt} peak-to-peak sine source, and the frequency is swept
+from \SI{100}{\hertz} to \SI{10}{\kilo\hertz}. At each frequency we measure the
+amplitude of the reactive element voltage and its phase difference relative to the
+source.
+
+The point is to see impedance behave the way resistance does not. Impedance is a
+complex number $Z = R + jX$, so the series combination rules from DC still apply,
+but the reactance $X$ depends on frequency: $Z_C = 1/(j\omega C)$ shrinks as
+frequency goes up, while $Z_L = j\omega L$ grows. Because the impedances are
+complex, the element voltages come out shifted in phase from the source, and the
+voltage divider that sets each element voltage changes as the frequency changes.
+We express all of the results as phasors and compare the measured magnitude and
+phase against the calculated values.
+
+%------------------------------------------------------------------------------
+\section*{Procedure}
+
+\begin{enumerate}
+    \item Built a series RC circuit with the \SI{4.7}{\kilo\ohm} resistor and the
+          \SI{0.1}{\micro\farad} capacitor across the sine wave source on the
+          XK700 trainer.
+    \item Set the source amplitude to \SI{10}{\volt} peak-to-peak and verified it
+          on the oscilloscope. Kept channel 1 on the source and channel 2 on the
+          element being measured.
+    \item Stepped the source frequency through \SI{100}{\hertz},
+          \SI{500}{\hertz}, \SI{1}{\kilo\hertz}, \SI{5}{\kilo\hertz}, and
+          \SI{10}{\kilo\hertz}. At each step we rechecked the source amplitude
+          (the generator output sags a little when the load impedance drops) and
+          recorded $V_C$ peak-to-peak and the phase difference $\phi_C$ between
+          $V_C$ and the source.
+    \item Measured phase from the time shift between the two zero crossings,
+          $\phi = -360^\circ \, \Delta t \, f$, taking the sign from whether the
+          element voltage crossed before or after the source.
+    \item Rebuilt the circuit as a series RL using the \SI{100}{\ohm} resistor and
+          the \SI{33}{\milli\henry} inductor, and repeated steps 2--4 recording
+          $V_L$ and $\phi_L$.
+    \item Rebuilt the circuit as a series RLC using the \SI{1}{\kilo\ohm}
+          resistor, the \SI{0.33}{\micro\farad} capacitor, and the
+          \SI{10}{\milli\henry} inductor. Repeated steps 2--4 at each frequency,
+          this time recording both $V_C$, $\phi_C$ and $V_L$, $\phi_L$. Moving the
+          scope probe between the capacitor and the inductor required
+          re-referencing ground, so we reordered the series elements as needed to
+          keep the element under test next to the grounded side.
+\end{enumerate}
+
+%------------------------------------------------------------------------------
+\section*{Calculations}
+
+All three circuits are a single series loop, so the total impedance is just the
+sum of the element impedances and each element voltage follows from the impedance
+divider. With the source taken as the phase reference,
+$\mathbf{V}_s = 10\angle 0^\circ$ V (peak-to-peak),
+\[
+    \mathbf{Z}_C = \frac{1}{j\omega C} = \frac{-j}{\omega C},
+    \qquad
+    \mathbf{Z}_L = j\omega L,
+    \qquad
+    \omega = 2\pi f .
+\]
+
+\noindent\textbf{RC circuit} ($R = \SI{4.7}{\kilo\ohm}$, $C = \SI{0.1}{\micro\farad}$):
+\[
+    \mathbf{Z}_T = R + \frac{1}{j\omega C},
+    \qquad
+    \mathbf{V}_C = \mathbf{V}_s \frac{\mathbf{Z}_C}{\mathbf{Z}_T},
+    \qquad
+    \mathbf{V}_R = \mathbf{V}_s \frac{R}{\mathbf{Z}_T}.
+\]
+
+\noindent\textbf{RL circuit} ($R = \SI{100}{\ohm}$, $L = \SI{33}{\milli\henry}$):
+\[
+    \mathbf{Z}_T = R + j\omega L,
+    \qquad
+    \mathbf{V}_L = \mathbf{V}_s \frac{\mathbf{Z}_L}{\mathbf{Z}_T}.
+\]
+
+\noindent\textbf{RLC circuit} ($R = \SI{1}{\kilo\ohm}$, $C = \SI{0.33}{\micro\farad}$,
+$L = \SI{10}{\milli\henry}$):
+\[
+    \mathbf{Z}_T = R + j\!\left(\omega L - \frac{1}{\omega C}\right),
+    \qquad
+    \mathbf{V}_C = \mathbf{V}_s \frac{\mathbf{Z}_C}{\mathbf{Z}_T},
+    \qquad
+    \mathbf{V}_L = \mathbf{V}_s \frac{\mathbf{Z}_L}{\mathbf{Z}_T}.
+\]
+
+The series RLC has a resonant frequency where the two reactances cancel:
+\[
+    f_0 = \frac{1}{2\pi\sqrt{LC}}
+        = \frac{1}{2\pi\sqrt{(\SI{10}{\milli\henry})(\SI{0.33}{\micro\farad})}}
+        = \SI{2.77}{\kilo\hertz},
+\]
+which falls between the \SI{1}{\kilo\hertz} and \SI{5}{\kilo\hertz} test points.
+
+% --- SciLab program ---
+\begin{lstlisting}[style=scilab, caption={SciLab program: theoretical impedances and phasor voltages}]
+// Lab 9 - Sinusoids & Phasors
+// Series RC, RL, RLC: total impedance and element voltage phasors
+
+f  = [100 500 1000 5000 10000];   // Hz
+Vs = 10;                          // Vpp, reference phase 0
+w  = 2*%pi*f;
+
+function polarprint(name, z)
+    mprintf("  %-4s = %9.3f  angle %8.2f deg\n", name, abs(z), atan(imag(z),real(z))*180/%pi);
+endfunction
+
+// ---------------- RC: R = 4.7k, C = 0.1u ----------------
+R = 4700; C = 0.1e-6;
+mprintf("\n=== RC circuit: R = 4.7k, C = 0.1u ===\n");
+for k = 1:length(f)
+    Zc = 1/(%i*w(k)*C);
+    Zt = R + Zc;
+    Vc = Vs*Zc/Zt;
+    Vr = Vs*R/Zt;
+    mprintf("f = %6.0f Hz\n", f(k));
+    polarprint("Zc", Zc); polarprint("Zt", Zt);
+    polarprint("Vc", Vc); polarprint("Vr", Vr);
+end
+
+// ---------------- RL: R = 100, L = 33m ----------------
+R = 100; L = 33e-3;
+mprintf("\n=== RL circuit: R = 100, L = 33m ===\n");
+for k = 1:length(f)
+    Zl = %i*w(k)*L;
+    Zt = R + Zl;
+    Vl = Vs*Zl/Zt;
+    Vr = Vs*R/Zt;
+    mprintf("f = %6.0f Hz\n", f(k));
+    polarprint("Zl", Zl); polarprint("Zt", Zt);
+    polarprint("Vl", Vl); polarprint("Vr", Vr);
+end
+
+// ---------------- RLC: R = 1k, C = 0.33u, L = 10m ----------------
+R = 1000; C = 0.33e-6; L = 10e-3;
+f0 = 1/(2*%pi*sqrt(L*C));
+mprintf("\n=== RLC circuit: R = 1k, C = 0.33u, L = 10m ===\n");
+mprintf("resonant frequency f0 = %.1f Hz\n", f0);
+for k = 1:length(f)
+    Zc = 1/(%i*w(k)*C);
+    Zl = %i*w(k)*L;
+    Zt = R + Zc + Zl;
+    Vc = Vs*Zc/Zt;
+    Vl = Vs*Zl/Zt;
+    mprintf("f = %6.0f Hz\n", f(k));
+    polarprint("Zl", Zl); polarprint("Zc", Zc); polarprint("Zt", Zt);
+    polarprint("Vc", Vc); polarprint("Vl", Vl);
+end
+\end{lstlisting}
+
+% --- SciLab runtime printout ---
+\begin{lstlisting}[caption={SciLab runtime output}]
+=== RC circuit: R = 4.7k, C = 0.1u ===
+f =    100 Hz
+  Zc   = 15915.494  angle   -90.00 deg
+  Zt   = 16594.968  angle   -73.55 deg
+  Vc   =     9.591  angle   -16.45 deg
+  Vr   =     2.832  angle    73.55 deg
+f =    500 Hz
+  Zc   =  3183.099  angle   -90.00 deg
+  Zt   =  5676.453  angle   -34.11 deg
+  Vc   =     5.608  angle   -55.89 deg
+  Vr   =     8.280  angle    34.11 deg
+f =   1000 Hz
+  Zc   =  1591.549  angle   -90.00 deg
+  Zt   =  4962.160  angle   -18.71 deg
+  Vc   =     3.207  angle   -71.29 deg
+  Vr   =     9.472  angle    18.71 deg
+f =   5000 Hz
+  Zc   =   318.310  angle   -90.00 deg
+  Zt   =  4710.767  angle    -3.87 deg
+  Vc   =     0.676  angle   -86.13 deg
+  Vr   =     9.977  angle     3.87 deg
+f =  10000 Hz
+  Zc   =   159.155  angle   -90.00 deg
+  Zt   =  4702.694  angle    -1.94 deg
+  Vc   =     0.338  angle   -88.06 deg
+  Vr   =     9.994  angle     1.94 deg
+
+=== RL circuit: R = 100, L = 33m ===
+f =    100 Hz
+  Zl   =    20.735  angle    90.00 deg
+  Zt   =   102.127  angle    11.71 deg
+  Vl   =     2.030  angle    78.29 deg
+  Vr   =     9.792  angle   -11.71 deg
+f =    500 Hz
+  Zl   =   103.673  angle    90.00 deg
+  Zt   =   144.042  angle    46.03 deg
+  Vl   =     7.197  angle    43.97 deg
+  Vr   =     6.942  angle   -46.03 deg
+f =   1000 Hz
+  Zl   =   207.345  angle    90.00 deg
+  Zt   =   230.200  angle    64.25 deg
+  Vl   =     9.007  angle    25.75 deg
+  Vr   =     4.344  angle   -64.25 deg
+f =   5000 Hz
+  Zl   =  1036.726  angle    90.00 deg
+  Zt   =  1041.537  angle    84.49 deg
+  Vl   =     9.954  angle     5.51 deg
+  Vr   =     0.960  angle   -84.49 deg
+f =  10000 Hz
+  Zl   =  2073.451  angle    90.00 deg
+  Zt   =  2075.861  angle    87.24 deg
+  Vl   =     9.988  angle     2.76 deg
+  Vr   =     0.482  angle   -87.24 deg
+
+=== RLC circuit: R = 1k, C = 0.33u, L = 10m ===
+resonant frequency f0 = 2770.5 Hz
+f =    100 Hz
+  Zl   =     6.283  angle    90.00 deg
+  Zc   =  4822.877  angle   -90.00 deg
+  Zt   =  4919.307  angle   -78.27 deg
+  Vc   =     9.804  angle   -11.73 deg
+  Vl   =     0.013  angle   168.27 deg
+f =    500 Hz
+  Zl   =    31.416  angle    90.00 deg
+  Zc   =   964.575  angle   -90.00 deg
+  Zt   =  1367.767  angle   -43.02 deg
+  Vc   =     7.052  angle   -46.98 deg
+  Vl   =     0.230  angle   133.02 deg
+f =   1000 Hz
+  Zl   =    62.832  angle    90.00 deg
+  Zc   =   482.288  angle   -90.00 deg
+  Zt   =  1084.409  angle   -22.76 deg
+  Vc   =     4.447  angle   -67.24 deg
+  Vl   =     0.579  angle   112.76 deg
+f =   5000 Hz
+  Zl   =   314.159  angle    90.00 deg
+  Zc   =    96.458  angle   -90.00 deg
+  Zt   =  1023.423  angle    12.28 deg
+  Vc   =     0.942  angle  -102.28 deg
+  Vl   =     3.070  angle    77.72 deg
+f =  10000 Hz
+  Zl   =   628.319  angle    90.00 deg
+  Zc   =    48.229  angle   -90.00 deg
+  Zt   =  1156.073  angle    30.12 deg
+  Vc   =     0.417  angle  -120.12 deg
+  Vl   =     5.435  angle    59.88 deg
+\end{lstlisting}
+
+\subsection*{Theoretical Results}
+
+\begin{table}[H]
+    \centering
+    \caption{RC circuit, theoretical ($R = \SI{4.7}{\kilo\ohm}$, $C = \SI{0.1}{\micro\farad}$)}
+    \begin{tabular}{rcccc}
+        \toprule
+        $f$ (Hz) & $|Z_T|$ (\si{\ohm}) & $\angle Z_T$ (\si{\degree})
+                 & $V_C$ (Vpp) & $\phi_C$ (\si{\degree}) \\
+        \midrule
+        100    & 16595 & $-73.55$ & 9.591 & $-16.45$ \\
+        500    &  5676 & $-34.11$ & 5.608 & $-55.89$ \\
+        1000   &  4962 & $-18.71$ & 3.207 & $-71.29$ \\
+        5000   &  4711 & $-3.87$  & 0.676 & $-86.13$ \\
+        10000  &  4703 & $-1.94$  & 0.338 & $-88.06$ \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \caption{RL circuit, theoretical ($R = \SI{100}{\ohm}$, $L = \SI{33}{\milli\henry}$)}
+    \begin{tabular}{rcccc}
+        \toprule
+        $f$ (Hz) & $|Z_T|$ (\si{\ohm}) & $\angle Z_T$ (\si{\degree})
+                 & $V_L$ (Vpp) & $\phi_L$ (\si{\degree}) \\
+        \midrule
+        100    &  102.1 & $11.71$ & 2.030 & $78.29$ \\
+        500    &  144.0 & $46.03$ & 7.197 & $43.97$ \\
+        1000   &  230.2 & $64.25$ & 9.007 & $25.75$ \\
+        5000   & 1041.5 & $84.49$ & 9.954 & $5.51$  \\
+        10000  & 2075.9 & $87.24$ & 9.988 & $2.76$  \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \caption{RLC circuit, theoretical ($R = \SI{1}{\kilo\ohm}$, $C = \SI{0.33}{\micro\farad}$, $L = \SI{10}{\milli\henry}$)}
+    \begin{tabular}{rcccccc}
+        \toprule
+        $f$ (Hz) & $|Z_T|$ (\si{\ohm}) & $\angle Z_T$ (\si{\degree})
+                 & $V_C$ (Vpp) & $\phi_C$ (\si{\degree})
+                 & $V_L$ (Vpp) & $\phi_L$ (\si{\degree}) \\
+        \midrule
+        100    & 4919 & $-78.27$ & 9.804 & $-11.73$  & 0.013 & $168.27$ \\
+        500    & 1368 & $-43.02$ & 7.052 & $-46.98$  & 0.230 & $133.02$ \\
+        1000   & 1084 & $-22.76$ & 4.447 & $-67.24$  & 0.579 & $112.76$ \\
+        5000   & 1023 & $12.28$  & 0.942 & $-102.28$ & 3.070 & $77.72$  \\
+        10000  & 1156 & $30.12$  & 0.417 & $-120.12$ & 5.435 & $59.88$  \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+%------------------------------------------------------------------------------
+\section*{Measurements}
+
+Measurements were taken on a Global Specialties PB-503A trainer (the course
+handout specifies an XK700) using a Tektronix TDS 1002 oscilloscope. The TDS 1002
+has no automatic phase measurement, so every phase angle was obtained from time
+cursors: the period $T$ was read between successive rising zero crossings of the
+source on channel 1, the shift $\Delta t$ was read between the rising zero
+crossing of the source and the nearest rising zero crossing of the element
+voltage on channel 2, and the angle was computed as
+\[
+    \phi = \pm\, 360^\circ \, \frac{\Delta t}{T}.
+\]
+Taking $T$ from the trace rather than from the generator dial removes the
+generator's frequency accuracy from the result. The sign was assigned from which
+trace crossed first; a negative angle means the element voltage lags the source.
+Both channels were DC coupled and their zero references were aligned to the
+centre graticule line before each set of readings.
+
+Two departures from the ideal model were identified during the lab and are
+carried through the tables below. First, the PB-503A function generator has an
+output impedance of roughly \SI{600}{\ohm} rather than the \SI{50}{\ohm} assumed
+for a bench generator, so it could not hold \SI{10}{\volt} peak-to-peak into the
+low-impedance RL circuit. Fitting the measured source amplitude at node A against
+a divider model over the five RL test frequencies gives
+$R_g \approx \SI{575}{\ohm}$ with an rms residual of \SI{0.07}{\volt}. Because
+channel 1 was probed at the circuit node and not at the generator terminals,
+$R_g$ falls outside the measured loop and affects only the absolute amplitudes,
+not the voltage ratios or the phase angles. Second, the \SI{33}{\milli\henry}
+inductor carries a winding resistance of approximately \SI{43}{\ohm}, which is
+comparable to $|Z_L| = \SI{20.7}{\ohm}$ at \SI{100}{\hertz}. A DCR column is
+therefore included alongside the ideal calculation wherever it changes the
+prediction appreciably.
+
+\subsection*{Phase data}
+
+\begin{table}[H]
+    \centering
+    \caption{Cursor readings and computed phase angles}
+    \small
+    \begin{tabular}{lrccr}
+        \toprule
+        Circuit & $f$ (Hz) & $T$ & $\Delta t$ & $\phi$ (\si{\degree}) \\
+        \midrule
+        RC, $V_C$   & 100   & \SI{10}{\milli\second}  & \SI{900}{\micro\second} & $-32.40$ \\
+                    & 500   & \SI{2}{\milli\second}   & \SI{360}{\micro\second} & $-64.80$ \\
+                    & 1000  & \SI{1}{\milli\second}   & \SI{240}{\micro\second} & $-86.40$ \\
+                    & 5000  & \SI{200}{\micro\second} & \SI{48}{\micro\second}  & $-86.40$ \\
+                    & 10000 & \SI{100}{\micro\second} & \SI{24}{\micro\second}  & $-86.40$ \\
+        \midrule
+        RL, $V_L$   & 100   & \SI{10}{\milli\second}  & \SI{480}{\micro\second} & $17.28$ \\
+                    & 500   & \SI{2}{\milli\second}   & \SI{160}{\micro\second} & $28.80$ \\
+                    & 1000  & \SI{1}{\milli\second}   & \SI{76}{\micro\second}  & $27.36$ \\
+                    & 5000  & \SI{200}{\micro\second} & \SI{10}{\micro\second}  & $18.00$ \\
+                    & 10000 & \SI{100}{\micro\second} & \SI{800}{\nano\second}  & $2.88$ \\
+        \midrule
+        RLC, $V_C$  & 100   & \SI{10}{\milli\second}  & \SI{520}{\micro\second} & $-18.72$ \\
+                    & 500   & \SI{2}{\milli\second}   & \SI{300}{\micro\second} & $-54.00$ \\
+                    & 1000  & \SI{1}{\milli\second}   & \SI{200}{\micro\second} & $-72.00$ \\
+                    & 5000  & \SI{200}{\micro\second} & \SI{144}{\micro\second} & $-100.80$\,\textsuperscript{a} \\
+                    & 10000 & \SI{100}{\micro\second} & \SI{68}{\micro\second}  & $-115.20$\,\textsuperscript{a} \\
+        \midrule
+        RLC, $V_L$  & 100   & \SI{10}{\milli\second}  & \SI{480}{\micro\second} & $17.28$ \\
+                    & 500   & \SI{2}{\milli\second}   & \SI{320}{\micro\second} & $57.60$ \\
+                    & 1000  & \SI{1}{\milli\second}   & \SI{212}{\micro\second} & $76.32$ \\
+                    & 5000  & \SI{200}{\micro\second} & \SI{37}{\micro\second}  & $66.60$ \\
+                    & 10000 & \SI{100}{\micro\second} & \SI{17}{\micro\second}  & $61.20$ \\
+        \bottomrule
+    \end{tabular}
+
+    \vspace{0.4em}
+    \footnotesize
+    \raggedright
+    \textsuperscript{a}Above resonance $\phi_C$ passes $-90^\circ$, and the cursor
+    was placed on the following source crossing rather than the preceding one.
+    The raw ratios give $259.20^\circ$ and $244.80^\circ$; subtracting
+    $360^\circ$ recovers the values shown.
+\end{table}
+
+\subsection*{Series RC}
+
+\begin{table}[H]
+    \centering
+    \caption{Measured values --- series RC ($R = \SI{4.7}{\kilo\ohm}$, $C = \SI{0.1}{\micro\farad}$)}
+    \begin{tabular}{rccccc}
+        \toprule
+        & \multicolumn{2}{c}{$V_C$ (Vpp)} & \multicolumn{3}{c}{$\phi_C$ (\si{\degree})} \\
+        \cmidrule(lr){2-3} \cmidrule(lr){4-6}
+        $f$ (Hz) & Calculated & Measured & Calculated & Measured & Difference \\
+        \midrule
+        100   & 9.591 & 9.600 & $-16.45$ & $-32.40$ & $-15.95$ \\
+        500   & 5.608 & 5.600 & $-55.89$ & $-64.80$ & $-8.91$  \\
+        1000  & 3.207 & 3.600 & $-71.29$ & $-86.40$ & $-15.11$ \\
+        5000  & 0.676 & 1.400 & $-86.13$ & $-86.40$ & $-0.27$  \\
+        10000 & 0.338 & 0.064\,\textsuperscript{b} & $-88.06$ & $-86.40$ & $1.66$ \\
+        \bottomrule
+    \end{tabular}
+
+    \vspace{0.4em}
+    \footnotesize
+    \raggedright
+    \textsuperscript{b}Recorded value; the monotonic trend of the other four
+    points suggests \SI{0.64}{\volt} peak-to-peak was intended.
+\end{table}
+
+The two lowest frequencies agree with the calculation to better than
+\SI{0.2}{\percent} in amplitude. The three highest phase readings are identical
+at $-86.40^\circ$, corresponding to $\Delta t / T = 0.24$ in all three cases,
+which is correct at \SI{5}{\kilo\hertz} and \SI{10}{\kilo\hertz} but not at
+\SI{1}{\kilo\hertz}, where the calculation calls for $\Delta t = \SI{198}{\micro\second}$.
+
+\subsection*{Series RL}
+
+The source amplitude at node A was recorded separately at each frequency because
+the generator could not hold \SI{10}{\volt} peak-to-peak into this circuit. The
+divider model uses $R_g = \SI{600}{\ohm}$ and an open-circuit amplitude of
+\SI{10}{\volt} peak-to-peak.
+
+\begin{table}[H]
+    \centering
+    \caption{Source amplitude at the circuit node --- series RL}
+    \begin{tabular}{rccc}
+        \toprule
+        $f$ (Hz) & $|Z_{\text{circuit}}|$ (\si{\ohm}) & $V_s$ predicted (Vpp) & $V_s$ measured (Vpp) \\
+        \midrule
+        100   & 144.5  & 1.94 & 2.08 \\
+        500   & 176.6  & 2.35 & 2.50 \\
+        1000  & 251.9  & 3.27 & 3.40 \\
+        5000  & 1046.5 & 8.21 & 8.20 \\
+        10000 & 2078.1 & 9.44 & 9.40 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Because the source amplitude varies with frequency, the amplitude comparison is
+made on the ratio $V_L / V_s$, which is independent of $R_g$.
+
+\begin{table}[H]
+    \centering
+    \caption{Measured values --- series RL ($R = \SI{100}{\ohm}$, $L = \SI{33}{\milli\henry}$)}
+    \small
+    \begin{tabular}{rcccccccc}
+        \toprule
+        & \multicolumn{2}{c}{measured (Vpp)} & \multicolumn{3}{c}{$V_L / V_s$}
+        & \multicolumn{3}{c}{$\phi_L$ (\si{\degree})} \\
+        \cmidrule(lr){2-3} \cmidrule(lr){4-6} \cmidrule(lr){7-9}
+        $f$ (Hz) & $V_s$ & $V_L$ & Ideal & DCR & Meas. & Ideal & DCR & Meas. \\
+        \midrule
+        100   & 2.08 & 0.800 & 0.203 & 0.330 & 0.385 & $78.29$ & $17.49$ & $17.28$ \\
+        500   & 2.50 & 1.600 & 0.720 & 0.635 & 0.640 & $43.97$ & $31.53$ & $28.80$ \\
+        1000  & 3.40 & 2.030\,\textsuperscript{c} & 0.901 & 0.841 & 0.597 & $25.75$ & $22.88$ & $27.36$ \\
+        5000  & 8.20 & 7.800 & 0.995 & 0.991 & 0.951 & $5.51$  & $5.48$  & $18.00$ \\
+        10000 & 9.40 & 9.300 & 0.999 & 0.998 & 0.989 & $2.76$  & $2.76$  & $2.88$  \\
+        \bottomrule
+    \end{tabular}
+
+    \vspace{0.4em}
+    \footnotesize
+    \raggedright
+    \textsuperscript{c}This ratio is lower than the one recorded at
+    \SI{500}{\hertz}. For a series RL circuit $V_L / V_s$ increases monotonically
+    with frequency, so one of the two entries in this row is in error.
+\end{table}
+
+The ideal column and the measured column disagree by as much as $61^\circ$ at
+\SI{100}{\hertz}, while the column that includes \SI{43}{\ohm} of winding
+resistance agrees to $0.2^\circ$. The same holds for the amplitude ratio at
+\SI{500}{\hertz} (0.635 predicted against 0.640 measured) and for the phase at
+\SI{10}{\kilo\hertz}. The \SI{5}{\kilo\hertz} phase point is the exception: a
+\SI{10}{\micro\second} cursor reading against a \SI{200}{\micro\second} period is
+too coarse to resolve an angle whose true value is near \SI{3}{\micro\second}.
+
+\subsection*{Series RLC}
+
+\begin{table}[H]
+    \centering
+    \caption{Measured values --- series RLC ($R = \SI{1}{\kilo\ohm}$, $C = \SI{0.33}{\micro\farad}$, $L = \SI{10}{\milli\henry}$)}
+    \small
+    \begin{tabular}{rccccccccc}
+        \toprule
+        & \multicolumn{2}{c}{$V_C$ (Vpp)} & \multicolumn{2}{c}{$\phi_C$ (\si{\degree})}
+        & \multicolumn{3}{c}{$V_L$ (Vpp)} & \multicolumn{2}{c}{$\phi_L$ (\si{\degree})} \\
+        \cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-8} \cmidrule(lr){9-10}
+        $f$ (Hz) & Calc. & Meas. & Calc. & Meas. & Ideal & DCR & Meas. & DCR & Meas. \\
+        \midrule
+        100   & 9.804 & 9.800 & $-11.73$  & $-18.72$  & 0.013 & 0.088 & 0.284 & $86.09$ & $17.28$ \\
+        500   & 7.052 & 7.000 & $-46.98$  & $-54.00$  & 0.230 & 0.381 & 0.388 & $77.97$ & $57.60$ \\
+        1000  & 4.447 & 4.400 & $-67.24$  & $-72.00$  & 0.579 & 0.677 & 0.680 & $77.52$ & $76.32$ \\
+        5000  & 0.942 & 0.900 & $-102.28$ & $-100.80$ & 3.070 & 2.976 & 2.800 & $70.42$ & $66.60$ \\
+        10000 & 0.417 & 0.440 & $-120.12$ & $-115.20$ & 5.435 & 5.277 & 4.860 & $57.00$ & $61.20$ \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+The capacitor amplitudes match the calculation at all five frequencies, the
+largest deviation being \SI{5.5}{\percent} at \SI{10}{\kilo\hertz}. The capacitor
+phase readings above resonance confirm the sign reversal of $\angle Z_T$: the
+measured $-100.80^\circ$ at \SI{5}{\kilo\hertz} and $-115.20^\circ$ at
+\SI{10}{\kilo\hertz} sit within \SI{5}{\degree} of the calculated values, and both
+lie beyond $-90^\circ$, which is only possible once the circuit has become
+inductive. The inductor amplitudes again track the DCR column rather than the
+ideal one, most clearly at \SI{1}{\kilo\hertz} where the measurement reads
+\SI{0.680}{\volt} against \SI{0.677}{\volt} predicted with winding resistance and
+\SI{0.579}{\volt} predicted without it. The inductor phase readings at
+\SI{100}{\hertz} and \SI{500}{\hertz} do not reconcile with either model; the
+\SI{100}{\hertz} entry duplicates the value recorded for the RL circuit at the
+same frequency and is likely a transcription error.
+
+%------------------------------------------------------------------------------
+%------------------------------------------------------------------------------
+\section*{Observations \& Discussion}
+
+For the most part our measured values matched the theoretical calculations, but
+the agreement was not uniform across the three circuits and the places where it
+broke down turned out to be more instructive than the places where it held. The
+RC circuit tracked theory the closest. The capacitor voltage at \SI{100}{\hertz}
+and \SI{500}{\hertz} came out within a couple tenths of a percent of the
+calculated amplitude, and the phase at the two lowest frequencies was within
+about $9^\circ$. The one problem in the RC data is that the three highest phase
+readings all came out to exactly $-86.40^\circ$, which corresponds to
+$\Delta t / T = 0.24$ in every case. That value is right at \SI{5}{\kilo\hertz}
+and \SI{10}{\kilo\hertz}, but at \SI{1}{\kilo\hertz} the calculation calls for
+$\Delta t = \SI{198}{\micro\second}$ and a phase near $-71^\circ$, so getting
+$-86^\circ$ there means the cursor most likely was not moved between those
+measurements. It is a reading error rather than anything the circuit did.
+
+The RL circuit is where the ideal model and the measurements disagreed the most,
+and both major sources of error in this lab showed up in it. The first is the
+function generator. The PB-503A does not hold \SI{10}{\volt} peak-to-peak into a
+low-impedance load; at \SI{100}{\hertz} the source at the circuit node had sagged
+to about \SI{2}{\volt} peak-to-peak. Fitting the measured source amplitude
+against a voltage-divider model across all five RL frequencies gives an output
+impedance of roughly \SI{600}{\ohm}, not the \SI{50}{\ohm} a bench generator is
+usually assumed to have, with an rms residual of only \SI{0.07}{\volt}. Because
+we probed channel~1 at the circuit node rather than at the generator terminals,
+this \SI{600}{\ohm} sits outside the loop we measured and does not affect the
+voltage ratios or the phase, which is why we compared $V_L / V_s$ rather than
+$V_L$ alone. The second source is the inductor itself. An ideal \SI{33}{\milli\henry}
+inductor has $|Z_L| = \SI{20.7}{\ohm}$ at \SI{100}{\hertz}, but a real inductor
+also has winding resistance, and ours measured on the order of \SI{43}{\ohm}. At
+low frequency that resistance is larger than the inductive reactance, so it
+dominates the element voltage. The effect on the phase is dramatic: the ideal
+calculation predicts $\phi_L = 78.3^\circ$ at \SI{100}{\hertz}, our measurement
+gave $17.3^\circ$, and a model that includes the \SI{43}{\ohm} of series
+resistance predicts $17.5^\circ$. The measured value sits within $0.2^\circ$ of
+the corrected model, so the $61^\circ$ discrepancy is not error at all; it is the
+winding resistance, which the ideal formula simply leaves out. The same
+correction brings the amplitude ratios into line at the low-frequency end.
+
+As we varied the frequency, the measured voltages moved exactly the way the
+impedances predict. In the RC circuit the capacitor voltage started high and fell
+as frequency rose, because $|Z_C| = 1/\omega C$ shrinks while the resistor stays
+fixed, so a smaller and smaller share of the source appears across the capacitor.
+This is low-pass behavior, and the phase confirmed it, moving from near $0^\circ$
+at \SI{100}{\hertz} toward $-90^\circ$ at the high end as the circuit became
+almost purely resistive from the capacitor's point of view. The RL circuit did
+the opposite. The inductor voltage started small and climbed toward the full
+source voltage as frequency rose, because $|Z_L| = \omega L$ grows with
+frequency, so more of the source drops across the inductor. That is high-pass
+behavior, and its phase moved from a large positive angle toward $0^\circ$ as the
+inductor came to dominate the loop. The two reactive elements are mirror images
+of each other, which is the whole point of running the same sweep on both.
+
+The RLC circuit was the most interesting because it does something neither of the
+single-reactance circuits can. Its resonant frequency is
+$f_0 = 1/(2\pi\sqrt{LC}) = \SI{2.77}{\kilo\hertz}$, which falls between our
+\SI{1}{\kilo\hertz} and \SI{5}{\kilo\hertz} test points, so the total reactance
+changes sign as the sweep passes through it: the circuit is capacitive below
+$f_0$ and inductive above it. Our measured capacitor phase caught this crossover.
+Below resonance $\phi_C$ stayed between $0^\circ$ and $-90^\circ$, but at
+\SI{5}{\kilo\hertz} and \SI{10}{\kilo\hertz} it read $-100.8^\circ$ and
+$-115.2^\circ$, both beyond $-90^\circ$, which can only happen once the net
+reactance has gone inductive and pushed the current phase past the point a purely
+capacitive divider could reach. Those two points also illustrate the wrap problem
+with the cursor method: the raw ratios gave $259.2^\circ$ and $244.8^\circ$
+because we placed the cursor on the source crossing after the element crossing
+rather than before it, and subtracting $360^\circ$ recovers the correct values.
+The inductor amplitudes in this circuit again followed the model that includes
+winding resistance rather than the ideal one, most clearly at \SI{1}{\kilo\hertz}
+where we measured \SI{0.680}{\volt} against \SI{0.677}{\volt} predicted with
+resistance and \SI{0.579}{\volt} without it. The low-frequency inductor phase
+readings in the RLC circuit did not reconcile with either model, and the
+\SI{100}{\hertz} entry is identical to the RL circuit's \SI{100}{\hertz} value,
+which points to a transcription slip in the notebook rather than a real
+measurement.
+
+The output waveforms themselves did not change shape as we swept the frequency.
+They stayed sinusoidal at the same frequency as the source throughout, which is
+what we expect from linear R, L, and C elements: a sinusoid driven into a linear
+network comes out a sinusoid at the same frequency, changed only in amplitude and
+phase. What varied was the amplitude of the element voltage and its phase
+relative to the source, and, in the RL circuit, the amplitude of the source
+itself once the generator's output impedance came into play. We saw no clipping
+or distortion, which tells us the generator was never driven into overload even
+when the RL load pulled its output down to a couple of volts.
+
+Overall the results confirmed the main ideas of the lab. Impedance behaves like
+resistance in that the series and divider rules carry straight over, but unlike
+resistance it is complex and frequency-dependent, so the element voltages come out
+shifted in phase and the divide between them shifts as the frequency changes.
+Where our numbers diverged from the ideal calculation, the difference was almost
+always one of two real effects the ideal model leaves out --- the generator's
+\SI{600}{\ohm} output impedance and the inductor's \SI{43}{\ohm} winding
+resistance --- and once those are folded in, the measurements line up with the
+theory.
+
+%==============================================================================
+\end{document}

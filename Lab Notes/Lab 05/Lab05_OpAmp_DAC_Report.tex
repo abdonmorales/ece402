@@ -1,0 +1,266 @@
+%==============================================================================
+%  ENGR 2405 - Electrical Circuits I
+%  Lab 05
+%
+%  Compile with pdfLaTeX (or XeLaTeX / LuaLaTeX).
+%  If you use the listings code blocks, no extra setup is needed.
+%==============================================================================
+\documentclass[11pt]{article}
+
+%------------------------- Packages -------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}     % page margins
+\usepackage{amsmath,amssymb}          % math
+\usepackage{graphicx}                 % \includegraphics for schematics/scope shots
+\usepackage{float}                    % [H] figure placement
+\usepackage{booktabs}                 % nicer tables
+\usepackage{siunitx}                  % \SI{5}{\ohm}, \SI{10}{\milli\second}, etc.
+\usepackage{listings}                 % SciLab / netlist code blocks
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage[hidelinks]{hyperref}
+\usepackage{titlesec}
+
+%------------------------- Section styling ------------------------------------
+\titleformat{\section}{\Large\bfseries}{}{0pt}{}
+\titlespacing*{\section}{0pt}{1.4em}{0.6em}
+
+%------------------------- Code listing style ---------------------------------
+\definecolor{codebg}{RGB}{245,245,245}
+\definecolor{codecomment}{RGB}{0,128,0}
+\definecolor{codekw}{RGB}{0,0,180}
+\lstset{
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    framesep=4pt,
+    keywordstyle=\color{codekw}\bfseries,
+    commentstyle=\color{codecomment}\itshape,
+    showstringspaces=false,
+    captionpos=b,
+    tabsize=2,
+}
+\definecolor{codestr}{RGB}{163,21,21}      % strings
+\definecolor{codenum}{RGB}{120,120,120}    % numbers
+
+% --- MATLAB (uses the listings built-in language) -------------------------
+\lstdefinestyle{matlab}{
+    language=Matlab,
+    stringstyle=\color{codestr},
+}
+
+% --- SciLab (custom: listings has no built-in SciLab language) -------------
+\lstdefinelanguage{Scilab}{
+    morekeywords={
+        function,endfunction,if,then,else,elseif,end,for,while,do,
+        select,case,break,continue,return,clc,clear,disp,mprintf,
+        printf,zeros,ones,eye,linspace,inv,det,sum,length,size,abs,
+        sqrt,real,imag,exp,sin,cos,tan,plot,plot2d,xlabel,ylabel,
+        title,legend,grid,poly,roots,find,pause,error,warning
+    },
+    sensitive=true,
+    morecomment=[l]{//},          % line comment
+    morecomment=[s]{/*}{*/},      % block comment
+    morestring=[b]",              % double-quoted strings
+    morestring=[b]',              % single-quoted strings
+}
+\lstdefinestyle{scilab}{
+    language=Scilab,
+    stringstyle=\color{codestr},
+}
+
+% --- LTSpice netlist (custom: SPICE directives & comments) -----------------
+\lstdefinelanguage{LTspice}{
+    morekeywords={
+        .tran,.op,.dc,.ac,.step,.param,.model,.lib,.include,.inc,
+        .meas,.measure,.save,.backanno,.end,.ends,.subckt,.global,
+        .ic,.nodeset,.options,.option,.func,.temp,.four,.noise,.tf
+    },
+    sensitive=false,
+    morecomment=[l]{*},           % lines beginning with * are comments
+    morecomment=[l]{;},           % inline ; comments
+    morestring=[b]",
+}
+\lstdefinestyle{netlist}{
+    language=LTspice,
+    keywordstyle=\color{codekw}\bfseries,
+    basicstyle=\ttfamily\small,
+}
+
+%==============================================================================
+\begin{document}
+
+%------------------------- Title block ----------------------------------------
+\begin{center}
+    {\LARGE\bfseries Lab 05 -- Op Amp Circuits I (DAC)}\\[0.8em]
+    {\large Abdon Morales}\\[0.3em]
+    {\large June 17, 2026}
+\end{center}
+\vspace{1em}
+
+%------------------------------------------------------------------------------
+\section*{Description}
+% Enter a brief description of the lab. This can be taken from the lab
+% assignment itself.
+
+In this lab, we built and tested a 4-bit digital-to-analog converter (DAC) based on an op-amp R-2R ladder. The ladder takes a 4-bit binary input set by switches $S_1$ through $S_4$. Each bit connects its rung either to the full-scale voltage $V_{FS}$ (logic 1) or to ground (logic 0), and the inverting op-amp stage turns that input into an analog output voltage. The ideal output follows
+\[
+    V_{out} = -(\text{Binary Value})\,(2^{-N})\,V_{FS},
+\]
+so each bit adds a negative, binary-weighted step to the output, with $B_4$ as the MSB and $B_1$ as the LSB.
+
+We first simulated the circuit in LTSpice with an ideal op-amp, once using the proper ratio (\SI{50}{\kilo\ohm} and \SI{100}{\kilo\ohm}) and once using a modified ratio made from accessible parts (\SI{47}{\kilo\ohm} and \SI{100}{\kilo\ohm}). We then built the circuit on the XK700 trainer with a 741 op-amp and measure the output voltage for every input from 0000b to 1111b.
+
+%------------------------------------------------------------------------------
+\section*{Procedure}
+% Describe the in-lab procedure you followed. Summarize it or number the steps.
+
+\begin{enumerate}
+    \item Verified the component values before building: four \SI{47}{\kilo\ohm} resistors, five \SI{100}{\kilo\ohm} resistors, and one 741 op-amp.
+    \item With the XK700 power off, built the 4-bit R-2R ladder DAC on the breadboard following the prelab schematic and the 741 pinout.
+    \item Wired the four bit inputs to the SW1--SW4 data switches, where down is LOW (\SI{0}{\volt}) and up is HIGH (\SI{5}{\volt}), so each switch selects logic 0 or logic 1 for its bit.
+    \item Connected the ground points to GND on the power supply, and connected $+\SI{12}{\volt}$ and $-\SI{12}{\volt}$ from the supply to $V_+$ (pin 7) and $V_-$ (pin 4) on the 741.
+    \item Double-checked every connection, then powered up the trainer.
+    \item Stepped the switches through each binary value from 0000b to 1111b and recorded the output voltage $V_{out}$ for each.
+\end{enumerate}
+
+%------------------------------------------------------------------------------
+\section*{Simulations}
+% Paste (a screenshot is best) your LTSpice schematic and the netlist. Include
+% simulation results (graphic outputs, etc.). Node voltages / branch currents
+% may be shown on the schematic if the image stays uncluttered; otherwise paste
+% the "Simulation Run Results" table here.
+
+The goal of the simulations is to verify that the output follows the DAC equation. The resolution (least-significant bit) is set by the number of bits:
+\[
+    R = \text{LSB} = V_{FS}\,(2^{-N}),
+\]
+which for $N = 4$ and $V_{FS} = \SI{5}{\volt}$ gives an LSB of $5/16 = \SI{0.3125}{\volt}$. The analog output for any input combination is
+\[
+    V_{out} = -(\text{Binary Value})\,(2^{-N})\,V_{FS}.
+\]
+
+Two simulation runs are required, both using \texttt{.include opamp.sub} with the ideal \texttt{opamp} component:
+\begin{itemize}
+    \item Proper ratio: $R = \SI{50}{\kilo\ohm}$, $2R = \SI{100}{\kilo\ohm}$.
+    \item Modified ratio: $R = \SI{47}{\kilo\ohm}$, $2R = \SI{100}{\kilo\ohm}$.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[width=0.8\textwidth]{CirvcuitsLab05.png}}
+    \caption{LTSpice schematic}
+\end{figure}
+
+\begin{lstlisting}[style=netlist, caption={LTSpice netlist}]
+* C:\Users\Abdon Morales\OneDrive - The University of Texas at Austin\Summer 2026\ECE 402\Lab Notes\Lab 05\Cirvcuits Lab05.asc
+* Generated by LTspice 26.0.2 for Windows.
+R1 N003 0 100K
+R2 N004 N003 47K
+R3 N005 N004 47K
+R4 N001 N005 47K
+R5 N002 N001 47K
+R6 N008 N005 100K
+R7 N007 N004 100K
+R8 N006 N003 100K
+XU1 N001 0 N002 opamp Aol=100K GBW=10Meg
+R9 N001 N009 100K
+V1 N006 0 0
+V2 N007 0 0
+V3 N008 0 0
+V4 N009 0 5
+.include opamp.sub
+.op
+.backanno
+.end
+\end{lstlisting}
+
+The proper-ratio run (\SI{50}{\kilo\ohm}/\SI{100}{\kilo\ohm}) reproduced the ideal equation exactly. The modified-ratio run (\SI{47}{\kilo\ohm}/\SI{100}{\kilo\ohm}) deviated from the ideal: the lower bits came out slightly larger in magnitude than ideal, while the upper bits fell short, so the full-scale output ($1111$) reached only \SI{-4.4802}{\volt} instead of \SI{-4.6875}{\volt}.
+
+\begin{table}[H]
+    \centering
+    \caption{Simulation run results, $V_{out}$ (V), $V_{FS} = \SI{5}{\volt}$.}
+    \begin{tabular}{cccc}
+        \toprule
+        $B_4 B_3 B_2 B_1$ & Decimal & Proper (50k/100k) & Modified (47k/100k) \\
+        \midrule
+        0000 & 0  & $0.0000$  & $0.0000$  \\
+        0001 & 1  & $-0.3125$ & $-0.3164$ \\
+        0010 & 2  & $-0.6250$ & $-0.6139$ \\
+        0011 & 3  & $-0.9375$ & $-0.9303$ \\
+        0100 & 4  & $-1.2500$ & $-1.1999$ \\
+        0101 & 5  & $-1.5625$ & $-1.5163$ \\
+        0110 & 6  & $-1.8750$ & $-1.8138$ \\
+        0111 & 7  & $-2.1875$ & $-2.1302$ \\
+        1000 & 8  & $-2.5000$ & $-2.3500$ \\
+        1001 & 9  & $-2.8125$ & $-2.6664$ \\
+        1010 & 10 & $-3.1250$ & $-2.9639$ \\
+        1011 & 11 & $-3.4375$ & $-3.2803$ \\
+        1100 & 12 & $-3.7500$ & $-3.5499$ \\
+        1101 & 13 & $-4.0625$ & $-3.8663$ \\
+        1110 & 14 & $-4.3750$ & $-4.1638$ \\
+        1111 & 15 & $-4.6875$ & $-4.4802$ \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+%------------------------------------------------------------------------------
+\section*{Measurements}
+% Put in any measurements taken (Voltmeter, LCR, Oscilloscope, etc.) as a table
+% of data or photos of oscilloscope images.
+
+\begin{table}[H]
+    \centering
+    \caption{DAC output for each 4-bit input ($V_{FS} = \SI{5}{\volt}$). Ideal $V_{out} = -(\text{decimal})/16 \times \SI{5}{\volt}$.}
+    \begin{tabular}{ccccc}
+        \toprule
+        $B_4 B_3 B_2 B_1$ & Decimal & Ideal $V_{out}$ (V) & Measured $V_{out}$ (V) & \% Error vs Ideal \\
+        \midrule
+        0000 & 0  & $0.0000$  & $0.000$  & --     \\
+        0001 & 1  & $-0.3125$ & $-0.318$ & $1.76$ \\
+        0010 & 2  & $-0.6250$ & $-0.615$ & $1.60$ \\
+        0011 & 3  & $-0.9375$ & $-0.931$ & $0.69$ \\
+        0100 & 4  & $-1.2500$ & $-1.203$ & $3.76$ \\
+        0101 & 5  & $-1.5625$ & $-1.519$ & $2.78$ \\
+        0110 & 6  & $-1.8750$ & $-1.816$ & $3.15$ \\
+        0111 & 7  & $-2.1875$ & $-2.132$ & $2.54$ \\
+        1000 & 8  & $-2.5000$ & $-2.335$ & $6.60$ \\
+        1001 & 9  & $-2.8125$ & $-2.650$ & $5.78$ \\
+        1010 & 10 & $-3.1250$ & $-2.948$ & $5.66$ \\
+        1011 & 11 & $-3.4375$ & $-3.263$ & $5.08$ \\
+        1100 & 12 & $-3.7500$ & $-3.536$ & $5.71$ \\
+        1101 & 13 & $-4.0625$ & $-3.852$ & $5.18$ \\
+        1110 & 14 & $-4.3750$ & $-4.149$ & $5.17$ \\
+        1111 & 15 & $-4.6875$ & $-4.464$ & $4.77$ \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+%------------------------------------------------------------------------------
+\section*{Observations \& Discussion}
+% List any anomalies or interesting observations. Discuss any discrepancies and
+% their reasons. Answer any questions from the lab.
+
+% Discussion items to address (from the handout):
+% 1. How did using R < (1/2)(2R) change the results? Can the feedback resistor
+%    compensate? Propose an R-2R modification using available resistor values
+%    that still matches the theoretical ladder within 0.5%.
+% 2. Actual vs ideal R/2R simulation: how large was the error, and what design
+%    change would push the actual circuit toward the theoretical result?
+% 3. Actual vs modified R/2R simulation: did SPICE predict the voltages? What
+%    was the error, and what explains any discrepancies?
+
+Our measured outputs followed the right stair-step pattern, but they did not match the ideal R-2R values. The low codes came out slightly high in magnitude (0001b measured $-0.318$ V against an ideal $-0.3125$ V), while the upper codes came out low, with the biggest gap at the MSB (1000b measured $-2.335$ V against an ideal $-2.500$ V, a 6.6\% error). The error stayed above 5\% across most of the upper half of the range. This is a ratio problem, not a random measurement problem. A true R-2R ladder needs $R$ to be exactly half of $2R$, but we built it from 47k and 100k, so the ratio was 0.47 instead of 0.50. That changes how current divides at each node. The bits do not all shift by the same amount or even in the same direction, which is the signature of a ratio error rather than a simple gain or offset.
+ 
+The measured values lined up closely with the modified 47k/100k LTSpice run. Every code agreed within about half a percent (1000b measured $-2.335$ V against a simulated $-2.350$ V, and full scale 1111b measured $-4.464$ V against $-4.4802$ V). So the SPICE model predicted the real circuit well once it used the actual resistor values. This matters because it pins the error on the design itself. The model and the bench agree, and both sit away from the ideal for the same reason, the 47k to 100k ratio.
+ 
+We also have to consider human error in building the circuit as a source of discrepancy. A rung wired to the wrong node, a resistor placed in the wrong position, a loose breadboard contact, or a misread on the meter would all show up as extra error on top of the ratio problem. The close agreement with the simulation actually argues that our build was mostly correct, because a real wiring mistake would have thrown specific codes far off instead of leaving every code within half a percent of the predicted value. The small differences that remain are about what we would expect from resistor tolerance, contact resistance on the breadboard, and reading the meter, rather than from a construction mistake. Even so, rechecking each connection against the schematic and verifying every resistor value before powering up is the main way we keep that source of error out.
+ 
+The obvious question is whether the feedback resistor can correct this. It cannot, at least not fully. In this inverting setup the output is $V_{out} = -R_f \sum I_{bit}$, so $R_f$ scales every bit by the same factor. It is a single gain knob. If we size $R_f$ to make the MSB exact, we would scale the output by $2.5/2.335$, but that same factor applied to the LSB, which was already high, pushes it further off. Because the bit errors point in opposite directions, no single multiplier fixes all of them at once. The most $R_f$ can do is trim one code, usually full scale, and leave the rest off.
+ 
+The real fix is to rebuild the ladder so the 2:1 ratio is exact instead of approximate, using the resistor values we already have by combining matched parts. We can make each $R$ from two 100k resistors in parallel, which gives exactly 50k, and keep the $2R$ rungs as single 100k resistors. The ratio is then 50k:100k by construction. Building the ratio out of identical resistors is far more accurate than trusting 47k against 100k, because parts from the same batch track each other, so the ratio error drops to their matching rather than their absolute tolerance. The same idea works the other way, making each $2R$ from two 47k resistors in series for 94k and keeping $R$ as a single 47k. Either approach should bring the ladder inside the 0.5\% target. The tradeoff is that it needs more resistors than the basic build.
+
+%==============================================================================
+\end{document}

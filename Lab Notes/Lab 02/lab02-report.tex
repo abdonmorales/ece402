@@ -1,0 +1,249 @@
+%==============================================================================
+%  ENGR 2405 - Electrical Circuits I
+%  Lab Report Template
+%
+%  Compile with pdfLaTeX (or XeLaTeX / LuaLaTeX).
+%  If you use the listings code blocks, no extra setup is needed.
+%==============================================================================
+\documentclass[11pt]{article}
+
+%------------------------- Packages -------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}     % page margins
+\usepackage{amsmath,amssymb}          % math
+\usepackage{graphicx}                 % \includegraphics for schematics/scope shots
+\usepackage{float}                    % [H] figure placement
+\usepackage{booktabs}                 % nicer tables
+\usepackage{siunitx}                  % \SI{5}{\ohm}, \SI{10}{\milli\second}, etc.
+\usepackage{listings}                 % SciLab / netlist code blocks
+\usepackage{xcolor}
+\usepackage{caption}
+\usepackage[hidelinks]{hyperref}
+\usepackage{titlesec}
+
+%------------------------- Section styling ------------------------------------
+\titleformat{\section}{\Large\bfseries}{}{0pt}{}
+\titlespacing*{\section}{0pt}{1.4em}{0.6em}
+
+%------------------------- Code listing style ---------------------------------
+\definecolor{codebg}{RGB}{245,245,245}
+\definecolor{codecomment}{RGB}{0,128,0}
+\definecolor{codekw}{RGB}{0,0,180}
+\lstset{
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    framesep=4pt,
+    keywordstyle=\color{codekw}\bfseries,
+    commentstyle=\color{codecomment}\itshape,
+    showstringspaces=false,
+    captionpos=b,
+    tabsize=2,
+}
+\definecolor{codestr}{RGB}{163,21,21}      % strings
+\definecolor{codenum}{RGB}{120,120,120}    % numbers
+
+% --- MATLAB (uses the listings built-in language) -------------------------
+\lstdefinestyle{matlab}{
+    language=Matlab,
+    stringstyle=\color{codestr},
+}
+
+% --- SciLab (custom: listings has no built-in SciLab language) -------------
+\lstdefinelanguage{Scilab}{
+    morekeywords={
+        function,endfunction,if,then,else,elseif,end,for,while,do,
+        select,case,break,continue,return,clc,clear,disp,mprintf,
+        printf,zeros,ones,eye,linspace,inv,det,sum,length,size,abs,
+        sqrt,real,imag,exp,sin,cos,tan,plot,plot2d,xlabel,ylabel,
+        title,legend,grid,poly,roots,find,pause,error,warning
+    },
+    sensitive=true,
+    morecomment=[l]{//},          % line comment
+    morecomment=[s]{/*}{*/},      % block comment
+    morestring=[b]",              % double-quoted strings
+    morestring=[b]',              % single-quoted strings
+}
+\lstdefinestyle{scilab}{
+    language=Scilab,
+    stringstyle=\color{codestr},
+}
+
+% --- LTSpice netlist (custom: SPICE directives & comments) -----------------
+\lstdefinelanguage{LTspice}{
+    morekeywords={
+        .tran,.op,.dc,.ac,.step,.param,.model,.lib,.include,.inc,
+        .meas,.measure,.save,.backanno,.end,.ends,.subckt,.global,
+        .ic,.nodeset,.options,.option,.func,.temp,.four,.noise,.tf
+    },
+    sensitive=false,
+    morecomment=[l]{*},           % lines beginning with * are comments
+    morecomment=[l]{;},           % inline ; comments
+    morestring=[b]",
+}
+\lstdefinestyle{netlist}{
+    language=LTspice,
+    keywordstyle=\color{codekw}\bfseries,
+    basicstyle=\ttfamily\small,
+}
+
+%==============================================================================
+\begin{document}
+
+%------------------------- Title block ----------------------------------------
+\begin{center}
+    {\LARGE\bfseries SciLab (Lab 02)}\\[0.8em]
+    {\large Abdon Morales}\\[0.3em]
+    {\large \today}
+\end{center}
+\vspace{1em}
+
+%------------------------------------------------------------------------------
+\section*{Description}
+% Enter a brief description of the lab. This can be taken from the lab
+% assignment itself.
+This lab will familiarize the student with the capabilities and basic use of SciLab which is a
+freely available calculation program. It is similar to the much more expensive commercial tool
+MATLAB. MATLAB is widely used in industry and has advanced capabilities in graphics
+plotting and code generation that go well beyond the capabilities of SciLab.
+
+
+This psuedo code just describes the math transforms necessary to implement
+\begin{enumerate}
+	\item Polar to Cartesian transforms and
+	\item Cartesian to polar transforms
+\end{enumerate}
+%------------------------------------------------------------------------------
+\section*{Calculations}
+% Put in any calculations you made. If you used SciLab, paste your program and
+% its runtime printout here. Include any reconciliation equations (e.g. mesh
+% currents to branch currents) if they are not part of your SciLab output.
+
+% --- SciLab program ---
+\begin{lstlisting}[style=scilab, caption={SciLab Part I}]
+%j=%i
+function x=polar2cart(m, a); 
+x=m*cos(a)+(%j*m*sin(a)); 
+endfunction
+
+function p=cart2polar(x);
+re = real(x); im = imag(x);
+m = sqrt(re^2 + im^2);
+a = atan(im, re);
+p = [m,a];
+endfunction
+
+// ----------------- MAIN PROGRAM -----------------
+disp("Abdon Morales");
+disp("ENGR 2405 - Polar/Cartesian Conversions Testcases");
+disp("========================================");
+// --- Test cart2polar ---
+disp("--- Testing cart2polar ---");
+x1 = 3 + 4*%i;
+printf("Input  (cartesian): %g + %gi\n", real(x1), imag(x1));
+out1 = cart2polar(x1);
+printf("Output [m a]:  m = %g,  a = %g rad  (%g deg)\n", ...
+       out1(1), out1(2), out1(2)*180/%pi);
+// --- Test polar2cart ---
+disp("--- Testing polar2cart ---");
+m2 = 5;
+a2 = 0.9273;   // ~53.13 deg expressed in radians
+printf("Input  (polar): m = %g,  a = %g rad\n", m2, a2);
+out2 = polar2cart(m2, a2);
+printf("Output (cartesian): %g + %gi\n", real(out2), imag(out2));
+// --- Round-trip check  ---
+disp("--- Round-trip: cart -> polar -> cart ---");
+back = polar2cart(out1(1), out1(2));
+printf("Should match 3 + 4i:  %g + %gi\n", real(back), imag(back));
+// --- Quadrant test: -3 + 4i (second quadrant) ---
+disp("--- Testing cart2polar in Quadrant II ---");
+x3 = -3 + 4*%i;
+printf("Input  (cartesian): %g + %gi\n", real(x3), imag(x3));
+out3 = cart2polar(x3);
+printf("Output [m a]:  m = %g,  a = %g rad  (%g deg)\n", ...
+       out3(1), out3(2), out3(2)*180/%pi);
+\end{lstlisting}
+
+% --- SciLab runtime printout ---
+\begin{lstlisting}[caption={SciLab Part I runtime output}]
+  "Abdon Morales"
+  "ENGR 2405 - Polar/Cartesian Conversions Testcases"
+  "========================================"
+  "--- Testing cart2polar ---"
+Input  (cartesian): 3 + 4i
+Output [m a]:  m = 5,  a = 0.927295 rad  (53.1301 deg)
+  "--- Testing polar2cart ---"
+Input  (polar): m = 5,  a = 0.9273 rad
+Output (cartesian): 2.99998 + 4.00001i
+  "--- Round-trip: cart -> polar -> cart ---"
+Should match 3 + 4i:  3 + 4i
+  "--- Testing cart2polar in Quadrant II ---"
+Input  (cartesian): -3 + 4i
+Output [m a]:  m = 5,  a = 2.2143 rad  (126.87 deg)
+\end{lstlisting}
+
+\begin{lstlisting}[style=scilab, caption={SciLab Part II}]
+// ----------------- MAIN PROGRAM (Part II) -----------------
+disp("Abdon Morales");
+disp("ENGR 2405 - System of Linear Equations");
+disp("========================================");
+// Build the matrix and vector
+A = [2 1 1; 1 2 1; 1 1 2];
+X = [1;2;3];
+disp("Matrix A = "); disp(A);
+disp("Vector X = "); disp(X);
+
+// Do the math via matrix-vector multiplication
+Y = A*X;
+disp("This is the result of A*X");
+disp(Y);
+
+// Do the matrix A inversion
+invA = inv(A);
+disp("This is A inverse =");
+disp(invA);
+
+// Now go back to find X using the inversion
+out = invA * Y;
+disp("Vector X using A inverse * Y");
+disp(out);
+\end{lstlisting}
+
+\begin{lstlisting}[caption={SciLab Part II runtime output}]
+  "Abdon Morales"
+  "ENGR 2405 - System of Linear Equations"
+  "========================================"
+  "Matrix A = "
+   2.   1.   1.
+   1.   2.   1.
+   1.   1.   2.
+  "Vector X = "
+   1.
+   2.
+   3.
+  "This is the result of A*X"
+   7.
+   8.
+   9.
+  "This is A inverse ="
+   0.75  -0.25  -0.25
+  -0.25   0.75  -0.25
+  -0.25  -0.25   0.75
+  "Vector X using A inverse * Y"
+   1.
+   2.
+   3.
+
+\end{lstlisting}
+
+%------------------------------------------------------------------------------
+\section*{Observations \& Discussion}
+% List any anomalies or interesting observations. Discuss any discrepancies and
+% their reasons. Answer any questions from the lab.
+
+None.
+
+%==============================================================================
+\end{document}

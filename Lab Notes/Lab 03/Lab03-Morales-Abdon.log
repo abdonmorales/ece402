@@ -1,0 +1,14 @@
+LTspice 26.0.2 for MacOS
+Circuit: /Users/abdonm/Library/CloudStorage/OneDrive-TheUniversityofTexasatAustin/Summer 2026/ECE 402/Lab Notes/Lab 03/Lab03-Morales-Abdon.net
+Start Time: Sun Jun  7 18:30:19 2026
+solver = Normal
+Maximum thread count: 10
+tnom = 27
+temp = 27
+method = trap
+Direct Newton iteration succeeded in finding operating point.
+Total elapsed time: 0.067 seconds.
+
+Files loaded:
+/Users/abdonm/Library/CloudStorage/OneDrive-TheUniversityofTexasatAustin/Summer 2026/ECE 402/Lab Notes/Lab 03/Lab03-Morales-Abdon.net
+

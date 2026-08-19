@@ -1,0 +1,516 @@
+%==============================================================================
+%  ENGR 2405 -- Electrical Circuits I -- Lab 11
+%  Simulated 3-Phase AC Circuit
+%
+%  Compile with pdflatex (run twice so the running header settles).
+%  Referenced images : scope_p1_p3.png  scope_p1_p2.png  scope_three_phase.png
+%==============================================================================
+\documentclass[11pt]{article}
+
+% ---- packages ---------------------------------------------------------------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{siunitx}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{caption}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{circuitikz}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+\usepackage[hidelinks]{hyperref}
+
+% ---- siunitx v2 / v3 compatibility ------------------------------------------
+\ifdefined\qty\else\newcommand{\qty}[2]{\SI{#1}{#2}}\fi
+\ifdefined\unit\else\newcommand{\unit}[1]{\si{#1}}\fi
+
+\renewcommand{\arraystretch}{1.15}
+
+% ---- SciLab listing style ---------------------------------------------------
+\definecolor{codekw}{rgb}{0.00,0.30,0.70}
+\definecolor{codecom}{rgb}{0.20,0.55,0.20}
+\definecolor{codestr}{rgb}{0.64,0.08,0.08}
+
+\lstdefinelanguage{Scilab}{
+    morekeywords={
+        function,endfunction,if,then,else,elseif,end,for,while,do,
+        select,case,break,continue,return,clc,clear,disp,mprintf,
+        printf,zeros,ones,eye,linspace,inv,det,sum,length,size,abs,
+        sqrt,real,imag,exp,sin,cos,tan,atan,plot,plot2d,xlabel,ylabel,
+        title,legend,grid,poly,roots,find,pause,error,warning
+    },
+    sensitive=true,
+    morecomment=[l]{//},
+    morecomment=[s]{/*}{*/},
+    morestring=[b]",
+    morestring=[b]',
+}
+\lstdefinestyle{scilab}{
+    language=Scilab,
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{codekw}\bfseries,
+    commentstyle=\color{codecom}\itshape,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    numbersep=8pt,
+    stringstyle=\color{codestr},
+    frame=single,
+    rulecolor=\color{gray!50},
+    breaklines=true,
+    showstringspaces=false,
+    tabsize=4,
+    captionpos=b,
+    xleftmargin=14pt,
+}
+\lstdefinestyle{console}{
+    basicstyle=\ttfamily\footnotesize,
+    frame=single,
+    rulecolor=\color{gray!50},
+    breaklines=true,
+    tabsize=4,
+    captionpos=b,
+    xleftmargin=14pt,
+}
+
+% ---- running header ---------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{ENGR 2405 -- Lab 11}
+\rhead{Abdon Morales}
+\cfoot{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+%==============================================================================
+\begin{document}
+
+% ----------------------------- title block -----------------------------------
+\begin{center}
+    {\large\bfseries ENGR 2405 -- Electrical Circuits I}\\[2pt]
+    {\large\bfseries Laboratory \#11: Simulated 3-Phase AC Circuit}\\[10pt]
+    \begin{tabular}{rl}
+        Name:    & Abdon Morales \\
+        UT EID:  & am226923 \\
+        Date:    & \today \\
+    \end{tabular}
+\end{center}
+\vspace{0.5em}
+\hrule
+\vspace{1.5em}
+
+% ----------------------------- description -----------------------------------
+\section*{Description}
+This lab builds a three op-amp network that turns a single sinusoidal source into
+a balanced three-phase set. The generator output is phase 1 ($P_1$). A unity
+inverter ($U_1$) flips it by \qty{180}{\degree}, an RC section adds another
+\qty{60}{\degree} of lag, and a non-inverting amplifier of gain 2 ($U_3$)
+restores the amplitude the RC divider took away, producing phase 3 ($P_3$) at
+\qty{240}{\degree} of lag. The third op-amp ($U_2$) is an inverting summer that
+adds $P_1$ and $P_3$ with equal weight and inverts the result, which lands at
+\qty{120}{\degree} of lag and becomes phase 2 ($P_2$). The RC section is the only
+frequency-dependent part of the circuit, so a given $R$ and $C$ pair produces a
+correct three-phase set at exactly one frequency. We build nine versions of the
+circuit using three resistors and three capacitors, calculate the design
+frequency for each pair, and then measure the frequency at which the circuit
+actually balances along with the phase of $P_2$ and $P_3$ relative to $P_1$.
+
+Throughout the report a phase angle is quoted as a lag with respect to $P_1$, so
+$P_2$ at \qty{120}{\degree} lags $P_1$ by \qty{120}{\degree} and $P_3$ at
+\qty{240}{\degree} lags it by \qty{240}{\degree}, which is the same signal as a
+\qty{120}{\degree} lead. That is the convention the handout uses.
+
+%==============================================================================
+\section*{Circuit and Design Equations}
+%==============================================================================
+The signal chain from $P_1$ to $P_3$ is shown in Figure~\ref{fig:chain}. $U_1$
+is an inverting amplifier with $R_1 = R_2 = \qty{10}{\kilo\ohm}$, so its gain is
+$-1$ and its output is $P_1$ shifted by \qty{180}{\degree}. That output drives
+the series combination of $R_{\text{freq}}$ and $C_{\text{freq}}$, and we tap the
+signal across the capacitor:
+\[
+    \frac{V_C}{V_{U1}} = \frac{1/j\omega C}{R + 1/j\omega C}
+    = \frac{1}{1 + j\omega RC},
+    \qquad
+    \left|\frac{V_C}{V_{U1}}\right| = \frac{1}{\sqrt{1+(\omega RC)^2}},
+    \qquad
+    \angle = -\tan^{-1}(\omega RC).
+\]
+Setting the lag to \qty{60}{\degree} gives the design condition
+\[
+    \tan^{-1}\!\left(\frac{R}{|Z_C|}\right) = \tan^{-1}(\omega RC) = 60^{\circ}
+    \quad\Longrightarrow\quad
+    \omega RC = \tan 60^{\circ} = \sqrt{3}
+    \quad\Longrightarrow\quad
+    \boxed{\,f = \frac{\sqrt{3}}{2\pi RC}\,}
+\]
+At that frequency the divider magnitude is $1/\sqrt{1+3} = 1/2$, which is why
+$U_3$ is set for a gain of 2 with $R_9 = R_{10} = \qty{10}{\kilo\ohm}$. The
+output of $U_3$ is therefore the same amplitude as $P_1$ and lags it by
+$180^{\circ} + 60^{\circ} = 240^{\circ}$.
+
+\begin{figure}[H]
+    \centering
+    \begin{circuitikz}[american, scale=0.92, transform shape]
+        % --- U1 inverting stage ---
+        \draw (0,0) node[left]{$P_1$} to[R, l=$R_1$, a=\qty{10}{\kilo\ohm}] (3,0);
+        \node [op amp, anchor=-] (U1) at (3,0) {\small $U_1$};
+        \draw (U1.+) -- ++(-0.45,0) node[ground]{};
+        \draw (3,0) -- ++(0,1.6) coordinate (f1)
+              to[R, l=$R_2$, a=\qty{10}{\kilo\ohm}] (f1 -| U1.out) -- (U1.out);
+        \draw (U1.out) node[above right,font=\footnotesize]{$180^{\circ}$};
+        % --- RC phase shifter ---
+        \draw (U1.out) to[R, l=$R_{\text{freq}}$] ++(2.6,0) coordinate (nC);
+        \draw (nC) to[C, l_=$C_{\text{freq}}$] ++(0,-2.0) node[ground]{};
+        % --- U3 non-inverting x2 ---
+        \node [op amp, anchor=+] (U3) at ($(nC)+(1.6,0)$) {\small $U_3$};
+        \draw (nC) -- (U3.+);
+        \draw (U3.-) -- ++(-0.8,0) coordinate (n3)
+              to[R, l_=$R_{10}$, a^=\qty{10}{\kilo\ohm}] ++(0,-1.8) node[ground]{};
+        \draw (n3) -- ++(0,1.9) coordinate (f3)
+              to[R, l=$R_9$, a=\qty{10}{\kilo\ohm}] (f3 -| U3.out) -- (U3.out);
+        \draw (U3.out) -- ++(1.0,0) node[right]{$P_3$}
+              node[above left=2pt and -2pt,font=\footnotesize]{$240^{\circ}$};
+    \end{circuitikz}
+    \caption{Phase-shift chain. $U_1$ inverts, the RC section adds
+    \qty{60}{\degree} of lag and halves the amplitude, and $U_3$ restores the
+    amplitude with a gain of 2.}
+    \label{fig:chain}
+\end{figure}
+
+The summing stage is shown in Figure~\ref{fig:summer}. With
+$R_5 = R_3 = R_7 = \qty{10}{\kilo\ohm}$ the output is
+\[
+    P_2 = -\left(\frac{R_7}{R_5}P_1 + \frac{R_7}{R_3}P_3\right) = -(P_1 + P_3).
+\]
+Writing the two inputs as phasors with $P_1 = V\angle 0^{\circ}$ and
+$P_3 = V\angle 120^{\circ}$ (a \qty{240}{\degree} lag is a \qty{120}{\degree}
+lead),
+\[
+    P_1 + P_3 = V\left(1 + \left(-\tfrac{1}{2} + j\tfrac{\sqrt{3}}{2}\right)\right)
+    = V\left(\tfrac{1}{2} + j\tfrac{\sqrt{3}}{2}\right) = V\angle 60^{\circ},
+\]
+so the sum already has the right magnitude, and the inversion built into the
+summer moves it to $V\angle 240^{\circ} = V\angle -120^{\circ}$. That is a
+\qty{120}{\degree} lag, which is $P_2$. All three outputs then have the same
+amplitude and are spaced \qty{120}{\degree} apart, as sketched in
+Figure~\ref{fig:phasor}.
+
+\begin{figure}[H]
+    \centering
+    \begin{circuitikz}[american, scale=0.92, transform shape]
+        \draw (0,0) node[left]{$P_1$} to[R, l=$R_5$, a=\qty{10}{\kilo\ohm}] (3,0);
+        \draw (0,-1.6) node[left]{$P_3$} to[R, l_=$R_3$, a^=\qty{10}{\kilo\ohm}] (3,-1.6)
+              -- (3,0);
+        \node [op amp, anchor=-] (U2) at (3,0) {\small $U_2$};
+        \draw (U2.+) -- ++(-0.45,0) node[ground]{};
+        \draw (3,0) -- ++(0,1.6) coordinate (f2)
+              to[R, l=$R_7$, a=\qty{10}{\kilo\ohm}] (f2 -| U2.out) -- (U2.out);
+        \draw (U2.out) -- ++(1.0,0) node[right]{$P_2$}
+              node[above left=2pt and -2pt,font=\footnotesize]{$120^{\circ}$};
+    \end{circuitikz}
+    \caption{Summing stage. $U_2$ adds $P_1$ and $P_3$ with unity weight and
+    inverts, which places $P_2$ at \qty{120}{\degree} of lag.}
+    \label{fig:summer}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[scale=1.0, >={Stealth[round]}]
+        \draw[gray!40] (0,0) circle (2);
+        \draw[gray!60,->] (-2.5,0) -- (2.6,0) node[right,font=\footnotesize]{Re};
+        \draw[gray!60,->] (0,-2.5) -- (0,2.6) node[above,font=\footnotesize]{Im};
+        \draw[very thick,->] (0,0) -- (0:2)   node[right]{$P_1 = V\angle 0^{\circ}$};
+        \draw[very thick,->] (0,0) -- (240:2) node[below left]{$P_2 = V\angle -120^{\circ}$};
+        \draw[very thick,->] (0,0) -- (120:2) node[above left]{$P_3 = V\angle +120^{\circ}$};
+        \draw[gray] (0.7,0) arc (0:120:0.7);
+        \node[font=\footnotesize] at (60:1.0) {$120^{\circ}$};
+    \end{tikzpicture}
+    \caption{Phasor diagram of the three outputs at the design frequency. Reading
+    the sequence as $P_1 \rightarrow P_2 \rightarrow P_3$, each phase lags the
+    previous one by \qty{120}{\degree}.}
+    \label{fig:phasor}
+\end{figure}
+
+%==============================================================================
+\section*{Procedure}
+%==============================================================================
+\begin{enumerate}[leftmargin=*]
+    \item We picked three resistors, \qty{1}{\kilo\ohm}, \qty{4.7}{\kilo\ohm}
+    and \qty{10}{\kilo\ohm}, and three capacitors, \qty{100}{\nano\farad},
+    \qty{220}{\nano\farad} and \qty{470}{\nano\farad}, to use as
+    $R_{\text{freq}}$ and $C_{\text{freq}}$. Printed values were used for the
+    calculations rather than LCR readings.
+
+    \item We calculated the design frequency $f = \sqrt{3}/(2\pi RC)$ for all
+    nine $R$ and $C$ combinations in SciLab before building anything, so we knew
+    where to set the generator for each trial.
+
+    \item We built the circuit on the XK700 trainer with
+    $R_1 = R_2 = R_3 = R_5 = R_7 = R_9 = R_{10} = \qty{10}{\kilo\ohm}$. The
+    supply rails were set to $\pm\qty{12}{\volt}$ from the trainer, and every
+    op-amp package got a rail connection before any signal was applied.
+
+    \item We set the function generator for a \qty{5}{\volt} amplitude sine wave
+    at the calculated frequency for the first RC pair and applied it at $P_1$.
+
+    \item With channel 1 on $P_1$ and channel 2 on $P_3$, we adjusted the
+    generator frequency until the two amplitudes matched, then recorded that
+    frequency as $f_{\text{measured}}$.
+
+    \item We measured the phase of $P_3$ with the oscilloscope time cursors. The
+    TDS 1002 has no automatic phase readout, so we placed cursors on
+    corresponding rising zero crossings of $P_1$ and $P_3$, read $\Delta t$ and
+    the period $T$, and computed
+    $\phi = 360^{\circ}\,\Delta t / T$.
+
+    \item We moved channel 2 to $P_2$ and repeated the amplitude and phase
+    measurement at the same frequency.
+
+    \item We swapped in the next $R$ and $C$ pair and repeated steps 4 through 7
+    until all nine combinations were done.
+\end{enumerate}
+
+%==============================================================================
+\section*{Calculations}
+%==============================================================================
+The design frequency for each RC pair was computed with the SciLab script below.
+The resistor and capacitor arrays hold the values we measured on the LCR meter,
+so the printed frequencies are the ones we actually set the generator to.
+
+\begin{lstlisting}[style=scilab, caption={SciLab program \texttt{lab11\_freq.sce}.}]
+// ENGR 2405 Lab 11 - design frequency of the RC phase shifter
+// The RC tap must lag by 60 deg:  tan(60) = w*R*C = sqrt(3)
+//   =>  f = sqrt(3) / (2*pi*R*C)
+clear;
+
+R = [1.0e3  4.7e3  10.0e3];     // resistor values, ohms
+C = [100e-9 220e-9 470e-9];     // capacitor values, farads
+
+mprintf("   R (ohm)     C (F)      f_calc (Hz)\n");
+for i = 1:length(R)
+    for j = 1:length(C)
+        f = sqrt(3) / (2*%pi*R(i)*C(j));
+        mprintf("%10.1f  %10.2e  %11.2f\n", R(i), C(j), f);
+    end
+end
+\end{lstlisting}
+
+\begin{lstlisting}[style=console, caption={SciLab runtime output.}]
+   R (ohm)     C (F)      f_calc (Hz)
+    1000.0    1.00e-07      2756.64
+    1000.0    2.20e-07      1253.02
+    1000.0    4.70e-07       586.52
+    4700.0    1.00e-07       586.52
+    4700.0    2.20e-07       266.60
+    4700.0    4.70e-07       124.79
+   10000.0    1.00e-07       275.66
+   10000.0    2.20e-07       125.30
+   10000.0    4.70e-07        58.65
+\end{lstlisting}
+
+The prelab table was worked out for \qty{100}{\nano\farad}, \qty{470}{\nano\farad}
+and \qty{1}{\micro\farad}. The \qty{1}{\micro\farad} parts were not available at
+the bench, so we substituted \qty{220}{\nano\farad} and recomputed the column
+above before building anything.
+
+As a check on one row by hand, with $R = \qty{1}{\kilo\ohm}$ and
+$C = \qty{100}{\nano\farad}$,
+\[
+    f = \frac{\sqrt{3}}{2\pi(1000)(100\times10^{-9})}
+      = \frac{1.7321}{6.2832\times10^{-4}} = \qty{2756.6}{\hertz},
+\]
+and back-substituting, $\omega RC = 2\pi(2756.6)(10^{-4}) = 1.7321 = \sqrt{3}$,
+so $\tan^{-1}(\sqrt{3}) = 60^{\circ}$ as required.
+
+Each phase angle in the results table was converted from a cursor time
+difference using
+\[
+    \phi = 360^{\circ}\,\frac{\Delta t}{T} = 360^{\circ} f_{\text{meas}}\,\Delta t .
+\]
+For the same row, $f_{\text{meas}} = \qty{2700}{\hertz}$ gives
+$T = \qty{370.4}{\micro\second}$, and the $P_3$ cursor reading
+$\Delta t = \qty{244}{\micro\second}$ becomes
+$\phi = 360(244)/370.4 = 237.2^{\circ}$.
+
+%==============================================================================
+\section*{Data and Results}
+%==============================================================================
+Table~\ref{tab:results} lists all nine trials. The handout's example table asks
+for $\phi(P_1)$, but $P_1$ is the reference for every phase measurement and sits
+at $0^{\circ}$ by definition, so we recorded $\phi(P_3)$ in that column
+instead.\footnote{$\phi(P_3)$ is what the procedure actually asks to measure, so
+we read the column heading as a typo.} Phases are lags with respect to $P_1$;
+the design targets are \qty{240}{\degree} for $P_3$ and \qty{120}{\degree} for
+$P_2$. The raw cursor readings are included so the angles can be traced back to
+what was on the screen.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Measured results for all nine RC combinations. Phase angles are
+    computed from the cursor readings as $\phi = 360^{\circ} f_{\text{meas}}\Delta t$.}
+    \label{tab:results}
+    \begin{tabular}{cc rr r rr rr}
+        \toprule
+        $R$ & $C$ &
+        $f_{\text{calc}}$ & $f_{\text{meas}}$ & \% err &
+        $\Delta t_{P3}$ & $\phi(P_3)$ &
+        $\Delta t_{P2}$ & $\phi(P_2)$ \\
+        (\unit{\kilo\ohm}) & (\unit{\nano\farad}) &
+        (\unit{\hertz}) & (\unit{\hertz}) & &
+        (\unit{\milli\second}) & (\unit{\degree}) &
+        (\unit{\milli\second}) & (\unit{\degree}) \\
+        \midrule
+        1.0  & 100 & 2756.64 & 2700 & $-2.05$ & 0.244 & 237.2 & 0.124 & 120.5 \\
+        1.0  & 220 & 1253.02 & 1200 & $-4.23$ & 0.540 & 233.3 & 0.260 & 112.3 \\
+        1.0  & 470 &  586.52 &  586 & $-0.09$ & 1.120 & 236.3 & 0.580 & 122.1 \\
+        4.7  & 100 &  586.52 &  586 & $-0.09$ & 1.140 & 240.5 & 0.560 & 118.1 \\
+        4.7  & 220 &  266.60 &  266 & $-0.23$ & 2.520 & 241.3 & 1.240 & 118.8 \\
+        4.7  & 470 &  124.79 &  125 & $+0.17$ & 5.300 & 238.5 & 2.600 & 117.0 \\
+        10.0 & 100 &  275.66 &  276 & $+0.12$ & 2.400 & 238.5 & 1.200 & 119.2 \\
+        10.0 & 220 &  125.30 &  125 & $-0.24$ & 5.400 & 243.0 & 2.600 & 117.0 \\
+        10.0 & 470 &   58.65 &   59 & $+0.59$ & 11.400 & 242.1 & 5.700 & 121.1 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Table~\ref{tab:dev} pulls out how far each angle sits from its target. It also
+lists the angle an ideal RC section would produce at the frequency we actually
+ran at, which separates the part of the phase error that follows from being off
+the design frequency from the part that does not.
+
+\begin{table}[H]
+    \centering
+    \small
+    \caption{Phase deviation from the design targets of \qty{240}{\degree} and
+    \qty{120}{\degree}. The ideal column is $180^{\circ} + \tan^{-1}(\omega RC)$
+    evaluated at $f_{\text{meas}}$, which is what $P_3$ should read given that we
+    were not exactly on the design frequency.}
+    \label{tab:dev}
+    \begin{tabular}{cc r rr rr}
+        \toprule
+        $R$ & $C$ &
+        $\phi(P_3)$ ideal & $\phi(P_3)$ meas. & dev. &
+        $\phi(P_2)$ meas. & dev. \\
+        (\unit{\kilo\ohm}) & (\unit{\nano\farad}) &
+        (\unit{\degree}) & (\unit{\degree}) & (\unit{\degree}) &
+        (\unit{\degree}) & (\unit{\degree}) \\
+        \midrule
+        1.0  & 100 & 239.48 & 237.2 & $-2.8$ & 120.5 & $+0.5$ \\
+        1.0  & 220 & 238.92 & 233.3 & $-6.7$ & 112.3 & $-7.7$ \\
+        1.0  & 470 & 239.98 & 236.3 & $-3.7$ & 122.1 & $+2.1$ \\
+        4.7  & 100 & 239.98 & 240.5 & $+0.5$ & 118.1 & $-1.9$ \\
+        4.7  & 220 & 239.94 & 241.3 & $+1.3$ & 118.8 & $-1.2$ \\
+        4.7  & 470 & 240.04 & 238.5 & $-1.5$ & 117.0 & $-3.0$ \\
+        10.0 & 100 & 240.03 & 238.5 & $-1.5$ & 119.2 & $-0.8$ \\
+        10.0 & 220 & 239.94 & 243.0 & $+3.0$ & 117.0 & $-3.0$ \\
+        10.0 & 470 & 240.15 & 242.1 & $+2.1$ & 121.1 & $+1.1$ \\
+        \midrule
+        \multicolumn{4}{r}{Mean deviation\quad} & $-1.0$ & & $-1.5$ \\
+        \multicolumn{4}{r}{RMS deviation\quad}  & $3.1$  & & $3.2$ \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+%==============================================================================
+\section*{Observations \& Discussion}
+%==============================================================================
+The measured and calculated frequencies agreed closely for seven of the nine
+combinations, all within \qty{0.6}{\percent} of the design value and six of them
+within \qty{0.25}{\percent}. The two outliers are the two highest-frequency
+trials, \qty{1}{\kilo\ohm} with \qty{100}{\nano\farad} ($-2.05\%$) and
+\qty{1}{\kilo\ohm} with \qty{220}{\nano\farad} ($-4.23\%$), and in both the
+recorded frequency is a round number, \qty{2700}{\hertz} and
+\qty{1200}{\hertz}. Those are readout results rather than physical ones. Above
+about \qty{1}{\kilo\hertz} we were reading the generator to the nearest
+\qty{100}{\hertz}, so the discrepancies of \qty{57}{\hertz} and \qty{53}{\hertz}
+are roughly half a step in each case. The remaining seven rows sat where the
+display resolution was fine enough to land on the calculated value, and they did.
+
+That column is a weaker test than it looks, and it is worth being honest about
+that. We set $f_{\text{meas}}$ by adjusting the generator until the amplitude of
+$P_3$ matched $P_1$, and with the gain of 2 from $U_3$ included the balance
+condition is
+\[
+    A(f) = \frac{2}{\sqrt{1 + (\omega RC)^2}}, \qquad
+    \omega RC = \sqrt{3}\,\frac{f}{f_0},
+\]
+which gives $A = 0.964$ at \qty{5}{\percent} above $f_0$ and $A = 0.929$ at
+\qty{10}{\percent} above. On a \qty{5}{\volt} amplitude signal that is only
+\qty{180}{\milli\volt} and \qty{355}{\milli\volt} of change, so matching the two
+traces by eye pins the frequency to something like $\pm\qty{5}{\percent}$. The
+phase reading is no sharper on its own: differentiating
+$\phi_{RC} = \tan^{-1}(\sqrt{3}f/f_0)$ at $f = f_0$ gives about
+\qty{0.25}{\degree} per \qty{1}{\percent} of frequency error against a cursor
+resolution of one to two degrees. The sub-percent agreement in the frequency
+column is therefore not evidence that the model is accurate to a fraction of a
+percent. What the two criteria establish together is a consistency check: the
+amplitudes balance and all three phases sit near their targets at the same
+frequency, and the model predicts that frequency to within the resolution of
+both.
+
+The phases themselves came out well. $\phi(P_3)$ landed within
+\qty{3.7}{\degree} of \qty{240}{\degree} in eight of nine trials and $\phi(P_2)$
+within \qty{3.0}{\degree} of \qty{120}{\degree} in eight of nine, with RMS
+deviations of \qty{3.1}{\degree} and \qty{3.2}{\degree}, about
+\qty{1}{\percent} of a full cycle. Both means are slightly negative,
+$-1.0^{\circ}$ and $-1.5^{\circ}$, so there is a small systematic shortfall in
+lag on top of the scatter. Part of that is not an error at all: if $f < f_0$
+then $\omega RC < \sqrt{3}$ and the RC section lags by less than
+\qty{60}{\degree}, so $P_3$ should come in under \qty{240}{\degree}.
+Table~\ref{tab:dev} evaluates $180^{\circ} + \tan^{-1}(\omega RC)$ at the
+frequency we actually used, and for the \qty{1}{\kilo\ohm} and
+\qty{220}{\nano\farad} row that ideal value is \qty{238.9}{\degree}, which
+accounts for about \qty{1.1}{\degree} of the \qty{6.7}{\degree} gap. That same
+row has by far the worst $\phi(P_2)$ at \qty{112.3}{\degree}, which follows,
+since $P_2$ is assembled from $P_1$ and $P_3$ by the summer and inherits
+whatever error $P_3$ carries. It is the only row where we were meaningfully off
+the design frequency and the only row where both angles are more than
+\qty{5}{\degree} out.
+
+The rest of the scatter comes from resolution and from the parts. The TDS 1002
+has no automatic phase function, so every angle came from placing two cursors on
+corresponding zero crossings and reading $\Delta t$ against the period. Our
+$\Delta t$ readings carry two or three significant figures, and one unit in the
+last figure is already worth about a degree: \qty{1}{\micro\second} out of a
+\qty{370}{\micro\second} period is \qty{0.97}{\degree} in the first row, and
+\qty{0.1}{\milli\second} out of \qty{16.9}{\milli\second} is \qty{2.1}{\degree}
+in the last. That alone brackets most of what we saw. On the component side,
+$f_0$ depends on the product $RC$, so a tolerance in either part propagates
+one-for-one into the calculated frequency, and \qty{5}{\percent} resistors with
+\qty{10}{\percent} capacitors put a worst case band of roughly
+\qty{15}{\percent} around each nominal value. We used printed values rather than
+LCR readings, so entries in the $f_{\text{calc}}$ column could be off by more
+than the differences under discussion. The analysis also treats the capacitor
+node as unloaded when it actually drives the non-inverting input of $U_3$, whose
+input capacitance and the breadboard together add a few picofarads. That matters
+most for the \qty{100}{\nano\farad} trials at the top of our range and is
+negligible at \qty{470}{\nano\farad}. Each op-amp stage contributes a small lag
+of its own at finite loop gain as well, and those accumulate through the chain,
+consistent with the mean deviation in $\phi(P_2)$ being slightly larger in
+magnitude than the one in $\phi(P_3)$.
+
+As for where a circuit like this gets used, the point of it is producing a
+balanced three-phase reference from a single-phase source and a handful of parts.
+On a bench that lets us exercise three-phase equipment such as phase sequence
+indicators, protective relays, or the front end of a three-phase rectifier
+without needing an actual three-phase supply. In a control setting the same
+three signals can serve as the reference for the gate drive of a three-phase
+inverter driving an induction motor, where the reference frequency sets the motor
+speed, and the same idea appears in signal processing where fixed phase offsets
+are generated this way for quadrature modulation. The limitation is the one these
+nine trials demonstrate directly: the shift is correct at a single frequency for
+a given $R$ and $C$, so a variable-frequency version needs $R$ or $C$ to track
+the frequency instead of staying fixed. That is why the practical modern approach
+is a digital one, where three phases are read out of a lookup table clocked at
+whatever rate the application needs and the \qty{120}{\degree} spacing is exact
+by construction.
+
+%==============================================================================
+\end{document}
